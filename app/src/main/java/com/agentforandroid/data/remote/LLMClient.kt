@@ -58,41 +58,56 @@ class LLMClient {
         try {
             val response = client.newCall(httpRequest).execute()
             if (!response.isSuccessful) {
+                val errorBody = try { response.body?.string()?.take(300) } catch (_: Exception) { "" } ?: ""
                 trySend(LLMResult.Error(
                     when (response.code) {
                         401 -> "API Key 无效，请检查设置"
                         404 -> "模型 ID 不匹配，请检查配置"
                         429 -> "请求过于频繁，请稍后重试"
                         in 500..599 -> "模型服务异常，请稍后重试"
-                        else -> "请求失败 (${response.code})"
+                        else -> "请求失败 (${response.code}): ${errorBody.take(150)}"
                     }
                 ))
                 close()
                 return@callbackFlow
             }
 
-            response.body?.source()?.let { source ->
-                while (!source.exhausted()) {
-                    val line = source.readUtf8Line() ?: break
-                    if (line.startsWith("data: ")) {
-                        val json = line.removePrefix("data: ").trim()
-                        if (json == "[DONE]") continue
-                        try {
-                            val delta = JSONObject(json)
-                                .optJSONArray("choices")
-                                ?.optJSONObject(0)
-                                ?.optJSONObject("delta")
-                                ?.optString("content", "") ?: ""
-                            if (delta.isNotEmpty()) {
-                                trySend(LLMResult.Chunk(delta))
-                            }
-                        } catch (_: Exception) { /* skip bad chunks */ }
-                    }
+            val body = response.body
+            if (body == null) {
+                trySend(LLMResult.Error("服务器返回空响应"))
+                close()
+                return@callbackFlow
+            }
+
+            val source = body.source()
+            var hasContent = false
+            while (!source.exhausted()) {
+                val line = source.readUtf8Line() ?: break
+                if (line.startsWith("data: ")) {
+                    val json = line.removePrefix("data: ").trim()
+                    if (json == "[DONE]") continue
+                    try {
+                        val delta = JSONObject(json)
+                            .optJSONArray("choices")
+                            ?.optJSONObject(0)
+                            ?.optJSONObject("delta")
+                            ?.optString("content", "") ?: ""
+                        if (delta.isNotEmpty()) {
+                            hasContent = true
+                            trySend(LLMResult.Chunk(delta))
+                        }
+                    } catch (_: Exception) { /* skip bad chunks */ }
                 }
             }
-            trySend(LLMResult.Done)
+            if (!hasContent) {
+                trySend(LLMResult.Error("未收到任何内容。请检查模型ID和API类型是否正确"))
+            } else {
+                trySend(LLMResult.Done)
+            }
         } catch (e: IOException) {
             trySend(LLMResult.Error("网络连接失败: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            trySend(LLMResult.Error("请求出错: ${e.localizedMessage ?: "未知错误"}"))
         }
         close()
     }
@@ -119,7 +134,17 @@ class LLMClient {
             }))
         }
 
-        val url = request.baseUrl.trimEnd('/') + "/messages"
+        // Support both /v1/messages (standard) and /messages (custom endpoints)
+        val base = request.baseUrl.trimEnd('/')
+        val url = if (base.endsWith("/v1") || base.endsWith("/anthropic"))
+            "$base/messages"
+        else if (base.endsWith("/anthropic/v1"))
+            "$base/messages"
+        else if (!base.contains("/v1") && !base.endsWith("/messages"))
+            "$base/v1/messages"
+        else
+            "$base/messages"
+
         val requestBody = bodyJson.toString()
             .toRequestBody("application/json".toMediaType())
 
@@ -134,47 +159,83 @@ class LLMClient {
         try {
             val response = client.newCall(httpRequest).execute()
             if (!response.isSuccessful) {
-                val errorBody = response.body?.string() ?: ""
+                val errorBody = try { response.body?.string()?.take(300) } catch (_: Exception) { "" } ?: ""
                 trySend(LLMResult.Error(
                     when (response.code) {
                         401 -> "API Key 无效，请检查设置"
-                        404 -> "模型 ID 不匹配，请检查配置"
+                        404 -> "模型 ID 不匹配，请检查配置。URL: $url"
                         429 -> "请求过于频繁，请稍后重试"
                         in 500..599 -> "模型服务异常，请稍后重试"
-                        else -> "请求失败 (${response.code}): ${errorBody.take(100)}"
+                        else -> "请求失败 (${response.code}): ${errorBody.take(150)}"
                     }
                 ))
                 close()
                 return@callbackFlow
             }
 
-            response.body?.source()?.let { source ->
-                while (!source.exhausted()) {
-                    val line = source.readUtf8Line() ?: break
-                    if (line.startsWith("data: ")) {
-                        val json = line.removePrefix("data: ").trim()
-                        try {
-                            val event = JSONObject(json)
-                            val eventType = event.optString("type", "")
-                            when {
-                                eventType == "content_block_delta" -> {
-                                    val delta = event.optJSONObject("delta")
-                                    val text = delta?.optString("text", "") ?: ""
-                                    if (text.isNotEmpty()) {
-                                        trySend(LLMResult.Chunk(text))
-                                    }
-                                }
-                                eventType == "message_stop" -> {
-                                    trySend(LLMResult.Done)
-                                }
-                                // ignore message_start, content_block_start, ping, etc.
+            val body = response.body
+            if (body == null) {
+                trySend(LLMResult.Error("服务器返回空响应"))
+                close()
+                return@callbackFlow
+            }
+
+            val source = body.source()
+            var hasContent = false
+            while (!source.exhausted()) {
+                val line = source.readUtf8Line() ?: break
+                if (line.startsWith("data: ")) {
+                    val json = line.removePrefix("data: ").trim()
+                    try {
+                        val event = JSONObject(json)
+
+                        // Anthropic format: content_block_delta.delta.text
+                        val eventType = event.optString("type", "")
+                        if (eventType == "content_block_delta") {
+                            val delta = event.optJSONObject("delta")
+                            val text = delta?.optString("text", "") ?: ""
+                            if (text.isNotEmpty()) {
+                                hasContent = true
+                                trySend(LLMResult.Chunk(text))
                             }
-                        } catch (_: Exception) { /* skip bad events */ }
-                    }
+                        } else if (eventType == "message_stop") {
+                            trySend(LLMResult.Done)
+                            close()
+                            return@callbackFlow
+                        }
+                        // Fallback: OpenAI format (some providers use this on anthropic endpoints)
+                        else if (eventType.isEmpty() || eventType == "message_start" || eventType == "content_block_start") {
+                            // Try OpenAI-style delta.content
+                            val choices = event.optJSONArray("choices")
+                            if (choices != null && choices.length() > 0) {
+                                val delta = choices.optJSONObject(0)?.optJSONObject("delta")
+                                val text = delta?.optString("content", "") ?: ""
+                                if (text.isNotEmpty()) {
+                                    hasContent = true
+                                    trySend(LLMResult.Chunk(text))
+                                }
+                            }
+                        }
+                        // Also try top-level text field
+                        if (!hasContent) {
+                            val directText = event.optString("text", "")
+                            if (directText.isNotEmpty()) {
+                                hasContent = true
+                                trySend(LLMResult.Chunk(directText))
+                            }
+                        }
+                    } catch (_: Exception) { /* skip bad events */ }
                 }
+            }
+            if (!hasContent) {
+                trySend(LLMResult.Error("未收到任何内容。请检查模型ID和API类型是否正确"))
+            } else {
+                trySend(LLMResult.Done)
             }
         } catch (e: IOException) {
             trySend(LLMResult.Error("网络连接失败: ${e.localizedMessage}"))
+        } catch (e: Exception) {
+            trySend(LLMResult.Error("请求出错: ${e.localizedMessage ?: "未知错误"}"))
         }
         close()
     }
