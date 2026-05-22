@@ -20,9 +20,9 @@ class ConfigViewModel(application: Application) : AndroidViewModel(application) 
     val configs: StateFlow<List<ModelConfig>> = repository.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun add(name: String, modelId: String, apiKey: String, baseUrl: String) {
+    fun add(name: String, modelId: String, apiKey: String, baseUrl: String, apiType: String = "openai") {
         viewModelScope.launch {
-            val newConfig = repository.add(name, modelId, apiKey, baseUrl)
+            val newConfig = repository.add(name, modelId, apiKey, baseUrl, apiType)
             // If this is the first config, set it as default
             if (configs.value.isEmpty()) {
                 repository.setDefault(newConfig.id)

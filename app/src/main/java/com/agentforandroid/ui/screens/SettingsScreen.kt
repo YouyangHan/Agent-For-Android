@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -68,8 +69,8 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
         ConfigDialog(
             title = "添加模型",
             onDismiss = { showAddDialog = false },
-            onConfirm = { name, modelId, apiKey, baseUrl ->
-                viewModel.add(name, modelId, apiKey, baseUrl)
+            onConfirm = { name, modelId, apiKey, baseUrl, apiType ->
+                viewModel.add(name, modelId, apiKey, baseUrl, apiType)
                 showAddDialog = false
             }
         )
@@ -80,8 +81,8 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
             title = "编辑模型",
             initial = config,
             onDismiss = { editingConfig = null },
-            onConfirm = { name, modelId, apiKey, baseUrl ->
-                viewModel.update(config.copy(name = name, modelId = modelId, apiKey = apiKey, baseUrl = baseUrl))
+            onConfirm = { name, modelId, apiKey, baseUrl, apiType ->
+                viewModel.update(config.copy(name = name, modelId = modelId, apiKey = apiKey, baseUrl = baseUrl, apiType = apiType))
                 editingConfig = null
             }
         )
@@ -132,13 +133,15 @@ private fun ConfigDialog(
     title: String,
     initial: ModelConfig? = null,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, modelId: String, apiKey: String, baseUrl: String) -> Unit
+    onConfirm: (name: String, modelId: String, apiKey: String, baseUrl: String, apiType: String) -> Unit
 ) {
     var name by remember { mutableStateOf(initial?.name ?: "") }
     var modelId by remember { mutableStateOf(initial?.modelId ?: "") }
     var apiKey by remember { mutableStateOf(initial?.apiKey ?: "") }
     var baseUrl by remember { mutableStateOf(initial?.baseUrl ?: "https://api.openai.com/v1") }
+    var apiType by remember { mutableStateOf(initial?.apiType ?: "openai") }
     var showKey by remember { mutableStateOf(false) }
+    var apiTypeExpanded by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -163,12 +166,53 @@ private fun ConfigDialog(
                 )
                 OutlinedTextField(value = baseUrl, onValueChange = { baseUrl = it },
                     label = { Text("Base URL") }, singleLine = true)
+
+                // API type selector
+                Box {
+                    OutlinedTextField(
+                        value = if (apiType == "anthropic") "Anthropic" else "OpenAI",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("API 类型") },
+                        trailingIcon = {
+                            IconButton(onClick = { apiTypeExpanded = true }) {
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    DropdownMenu(
+                        expanded = apiTypeExpanded,
+                        onDismissRequest = { apiTypeExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("OpenAI (Chat Completions)") },
+                            onClick = {
+                                apiType = "openai"
+                                if (baseUrl.isBlank() || baseUrl == "https://api.anthropic.com") {
+                                    baseUrl = "https://api.openai.com/v1"
+                                }
+                                apiTypeExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Anthropic (Messages)") },
+                            onClick = {
+                                apiType = "anthropic"
+                                if (baseUrl.isBlank() || baseUrl == "https://api.openai.com/v1") {
+                                    baseUrl = "https://api.anthropic.com"
+                                }
+                                apiTypeExpanded = false
+                            }
+                        )
+                    }
+                }
             }
         },
         confirmButton = {
             TextButton(onClick = {
                 if (name.isNotBlank() && modelId.isNotBlank() && apiKey.isNotBlank() && baseUrl.isNotBlank()) {
-                    onConfirm(name, modelId, apiKey, baseUrl)
+                    onConfirm(name, modelId, apiKey, baseUrl, apiType)
                 }
             }) { Text("保存") }
         },

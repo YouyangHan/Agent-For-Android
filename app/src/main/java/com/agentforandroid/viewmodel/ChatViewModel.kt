@@ -56,73 +56,91 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun sendMessage(text: String) {
         viewModelScope.launch {
-            val session = currentSession ?: return@launch
-            _error.value = null
-            _isLoading.value = true
-            _streamingText.value = ""
-
-            // Save user message
-            val userMsg = Message(
-                id = UUID.randomUUID().toString(),
-                sessionId = session.id,
-                role = "user",
-                content = text
-            )
-            chatRepo.saveMessage(userMsg)
-            _messages.value = _messages.value + userMsg
-
-            // Auto-title: use first user message
-            if (_messages.value.size == 1) {
-                val title = if (text.length > 30) text.take(30) + "..." else text
-                chatRepo.updateSessionTitle(session.id, title)
-            }
-
-            // Get model config
-            val config = configRepo.getDefault()
-            if (config == null) {
-                _error.value = "请先在设置中配置一个模型"
-                _isLoading.value = false
-                return@launch
-            }
-
-            // Build system prompt with skills
-            val enabledSkills = skillRepo.getEnabledSkills()
-            val systemPrompt = chatRepo.buildSystemPrompt(BASE_SYSTEM_PROMPT, enabledSkills)
-
-            // Build messages for LLM
-            val llmMessages = mutableListOf<Map<String, String>>()
-            llmMessages.add(mapOf("role" to "system", "content" to systemPrompt))
-
-            val historyMessages = _messages.value.map {
-                mapOf("role" to it.role, "content" to it.content)
-            }
-            llmMessages.addAll(historyMessages)
-
-            // Stream response
-            val fullResponse = StringBuilder()
-            chatRepo.streamChat(config, llmMessages).collect { result ->
-                when (result) {
-                    is LLMClient.LLMResult.Chunk -> {
-                        fullResponse.append(result.text)
-                        _streamingText.value = fullResponse.toString()
+            try {
+                // Get or create session inline (robust against LaunchedEffect timing)
+                val session = currentSession ?: run {
+                    val config = configRepo.getDefault()
+                    if (config == null) {
+                        _error.value = "请先在设置中配置一个模型"
+                        return@launch
                     }
-                    is LLMClient.LLMResult.Error -> {
-                        _error.value = result.message
-                    }
-                    is LLMClient.LLMResult.Done -> {
-                        val assistantMsg = Message(
-                            id = UUID.randomUUID().toString(),
-                            sessionId = session.id,
-                            role = "assistant",
-                            content = fullResponse.toString()
-                        )
-                        chatRepo.saveMessage(assistantMsg)
-                        _messages.value = _messages.value + assistantMsg
+                    val enabled = skillRepo.getEnabledSkills().map { it.name }
+                    val s = chatRepo.createSession(config.id, enabled)
+                    currentSession = s
+                    s
+                }
+
+                _error.value = null
+                _isLoading.value = true
+                _streamingText.value = ""
+
+                // Save user message
+                val userMsg = Message(
+                    id = UUID.randomUUID().toString(),
+                    sessionId = session.id,
+                    role = "user",
+                    content = text
+                )
+                chatRepo.saveMessage(userMsg)
+                _messages.value = _messages.value + userMsg
+
+                // Auto-title: use first user message (count user messages)
+                val userMsgCount = _messages.value.count { it.role == "user" }
+                if (userMsgCount == 1) {
+                    val title = if (text.length > 30) text.take(30) + "..." else text
+                    chatRepo.updateSessionTitle(session.id, title)
+                }
+
+                // Get model config
+                val config = configRepo.getDefault()
+                if (config == null) {
+                    _error.value = "请先在设置中配置一个模型"
+                    _isLoading.value = false
+                    return@launch
+                }
+
+                // Build system prompt with skills
+                val enabledSkills = skillRepo.getEnabledSkills()
+                val systemPrompt = chatRepo.buildSystemPrompt(BASE_SYSTEM_PROMPT, enabledSkills)
+
+                // Build messages for LLM
+                val llmMessages = mutableListOf<Map<String, String>>()
+                llmMessages.add(mapOf("role" to "system", "content" to systemPrompt))
+
+                val historyMessages = _messages.value.map {
+                    mapOf("role" to it.role, "content" to it.content)
+                }
+                llmMessages.addAll(historyMessages)
+
+                // Stream response
+                val fullResponse = StringBuilder()
+                chatRepo.streamChat(config, llmMessages).collect { result ->
+                    when (result) {
+                        is LLMClient.LLMResult.Chunk -> {
+                            fullResponse.append(result.text)
+                            _streamingText.value = fullResponse.toString()
+                        }
+                        is LLMClient.LLMResult.Error -> {
+                            _error.value = result.message
+                        }
+                        is LLMClient.LLMResult.Done -> {
+                            val assistantMsg = Message(
+                                id = UUID.randomUUID().toString(),
+                                sessionId = session.id,
+                                role = "assistant",
+                                content = fullResponse.toString()
+                            )
+                            chatRepo.saveMessage(assistantMsg)
+                            _messages.value = _messages.value + assistantMsg
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                _error.value = "发送失败: ${e.localizedMessage}"
+            } finally {
+                _streamingText.value = ""
+                _isLoading.value = false
             }
-            _streamingText.value = ""
-            _isLoading.value = false
         }
     }
 

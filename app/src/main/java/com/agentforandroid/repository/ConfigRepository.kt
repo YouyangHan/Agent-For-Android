@@ -22,14 +22,16 @@ class ConfigRepository(private val database: AppDatabase) {
         name: String,
         modelId: String,
         apiKey: String,
-        baseUrl: String
+        baseUrl: String,
+        apiType: String = "openai"
     ): ModelConfig {
         val config = ModelConfig(
             id = UUID.randomUUID().toString(),
             name = name,
             modelId = modelId,
             apiKey = apiKey,
-            baseUrl = baseUrl
+            baseUrl = baseUrl,
+            apiType = apiType
         )
         dao.insert(ConfigEntity.fromModel(config))
         return config

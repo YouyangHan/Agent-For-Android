@@ -56,14 +56,17 @@ class ChatRepository(private val database: AppDatabase) {
         config: ModelConfig,
         messages: List<Map<String, String>>
     ): Flow<LLMClient.LLMResult> {
-        return llmClient.streamChat(
-            LLMClient.LLMRequest(
-                model = config.modelId,
-                baseUrl = config.baseUrl,
-                apiKey = config.apiKey,
-                messages = messages
-            )
+        val request = LLMClient.LLMRequest(
+            model = config.modelId,
+            baseUrl = config.baseUrl,
+            apiKey = config.apiKey,
+            messages = messages
         )
+        return if (config.apiType == "anthropic") {
+            llmClient.streamChatAnthropic(request)
+        } else {
+            llmClient.streamChat(request)
+        }
     }
 
     fun shutdown() {

@@ -11,6 +11,7 @@ data class ConfigEntity(
     val modelId: String,
     val apiKey: String,
     val baseUrl: String,
+    val apiType: String = "openai",
     val isDefault: Boolean = false
 ) {
     fun toModel(): ModelConfig = ModelConfig(
@@ -19,6 +20,7 @@ data class ConfigEntity(
         modelId = modelId,
         apiKey = apiKey,
         baseUrl = baseUrl,
+        apiType = apiType,
         isDefault = isDefault
     )
 
@@ -29,6 +31,7 @@ data class ConfigEntity(
             modelId = config.modelId,
             apiKey = config.apiKey,
             baseUrl = config.baseUrl,
+            apiType = config.apiType,
             isDefault = config.isDefault
         )
     }

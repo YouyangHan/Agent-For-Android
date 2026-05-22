@@ -50,7 +50,7 @@ public final class ConfigDao_Impl implements ConfigDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `model_configs` (`id`,`name`,`modelId`,`apiKey`,`baseUrl`,`isDefault`) VALUES (?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `model_configs` (`id`,`name`,`modelId`,`apiKey`,`baseUrl`,`apiType`,`isDefault`) VALUES (?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -61,8 +61,9 @@ public final class ConfigDao_Impl implements ConfigDao {
         statement.bindString(3, entity.getModelId());
         statement.bindString(4, entity.getApiKey());
         statement.bindString(5, entity.getBaseUrl());
+        statement.bindString(6, entity.getApiType());
         final int _tmp = entity.isDefault() ? 1 : 0;
-        statement.bindLong(6, _tmp);
+        statement.bindLong(7, _tmp);
       }
     };
     this.__deletionAdapterOfConfigEntity = new EntityDeletionOrUpdateAdapter<ConfigEntity>(__db) {
@@ -82,7 +83,7 @@ public final class ConfigDao_Impl implements ConfigDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "UPDATE OR ABORT `model_configs` SET `id` = ?,`name` = ?,`modelId` = ?,`apiKey` = ?,`baseUrl` = ?,`isDefault` = ? WHERE `id` = ?";
+        return "UPDATE OR ABORT `model_configs` SET `id` = ?,`name` = ?,`modelId` = ?,`apiKey` = ?,`baseUrl` = ?,`apiType` = ?,`isDefault` = ? WHERE `id` = ?";
       }
 
       @Override
@@ -93,9 +94,10 @@ public final class ConfigDao_Impl implements ConfigDao {
         statement.bindString(3, entity.getModelId());
         statement.bindString(4, entity.getApiKey());
         statement.bindString(5, entity.getBaseUrl());
+        statement.bindString(6, entity.getApiType());
         final int _tmp = entity.isDefault() ? 1 : 0;
-        statement.bindLong(6, _tmp);
-        statement.bindString(7, entity.getId());
+        statement.bindLong(7, _tmp);
+        statement.bindString(8, entity.getId());
       }
     };
     this.__preparedStmtOfClearDefaults = new SharedSQLiteStatement(__db) {
@@ -233,6 +235,7 @@ public final class ConfigDao_Impl implements ConfigDao {
           final int _cursorIndexOfModelId = CursorUtil.getColumnIndexOrThrow(_cursor, "modelId");
           final int _cursorIndexOfApiKey = CursorUtil.getColumnIndexOrThrow(_cursor, "apiKey");
           final int _cursorIndexOfBaseUrl = CursorUtil.getColumnIndexOrThrow(_cursor, "baseUrl");
+          final int _cursorIndexOfApiType = CursorUtil.getColumnIndexOrThrow(_cursor, "apiType");
           final int _cursorIndexOfIsDefault = CursorUtil.getColumnIndexOrThrow(_cursor, "isDefault");
           final List<ConfigEntity> _result = new ArrayList<ConfigEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
@@ -247,11 +250,13 @@ public final class ConfigDao_Impl implements ConfigDao {
             _tmpApiKey = _cursor.getString(_cursorIndexOfApiKey);
             final String _tmpBaseUrl;
             _tmpBaseUrl = _cursor.getString(_cursorIndexOfBaseUrl);
+            final String _tmpApiType;
+            _tmpApiType = _cursor.getString(_cursorIndexOfApiType);
             final boolean _tmpIsDefault;
             final int _tmp;
             _tmp = _cursor.getInt(_cursorIndexOfIsDefault);
             _tmpIsDefault = _tmp != 0;
-            _item = new ConfigEntity(_tmpId,_tmpName,_tmpModelId,_tmpApiKey,_tmpBaseUrl,_tmpIsDefault);
+            _item = new ConfigEntity(_tmpId,_tmpName,_tmpModelId,_tmpApiKey,_tmpBaseUrl,_tmpApiType,_tmpIsDefault);
             _result.add(_item);
           }
           return _result;
@@ -283,6 +288,7 @@ public final class ConfigDao_Impl implements ConfigDao {
           final int _cursorIndexOfModelId = CursorUtil.getColumnIndexOrThrow(_cursor, "modelId");
           final int _cursorIndexOfApiKey = CursorUtil.getColumnIndexOrThrow(_cursor, "apiKey");
           final int _cursorIndexOfBaseUrl = CursorUtil.getColumnIndexOrThrow(_cursor, "baseUrl");
+          final int _cursorIndexOfApiType = CursorUtil.getColumnIndexOrThrow(_cursor, "apiType");
           final int _cursorIndexOfIsDefault = CursorUtil.getColumnIndexOrThrow(_cursor, "isDefault");
           final ConfigEntity _result;
           if (_cursor.moveToFirst()) {
@@ -296,11 +302,13 @@ public final class ConfigDao_Impl implements ConfigDao {
             _tmpApiKey = _cursor.getString(_cursorIndexOfApiKey);
             final String _tmpBaseUrl;
             _tmpBaseUrl = _cursor.getString(_cursorIndexOfBaseUrl);
+            final String _tmpApiType;
+            _tmpApiType = _cursor.getString(_cursorIndexOfApiType);
             final boolean _tmpIsDefault;
             final int _tmp;
             _tmp = _cursor.getInt(_cursorIndexOfIsDefault);
             _tmpIsDefault = _tmp != 0;
-            _result = new ConfigEntity(_tmpId,_tmpName,_tmpModelId,_tmpApiKey,_tmpBaseUrl,_tmpIsDefault);
+            _result = new ConfigEntity(_tmpId,_tmpName,_tmpModelId,_tmpApiKey,_tmpBaseUrl,_tmpApiType,_tmpIsDefault);
           } else {
             _result = null;
           }
@@ -331,6 +339,7 @@ public final class ConfigDao_Impl implements ConfigDao {
           final int _cursorIndexOfModelId = CursorUtil.getColumnIndexOrThrow(_cursor, "modelId");
           final int _cursorIndexOfApiKey = CursorUtil.getColumnIndexOrThrow(_cursor, "apiKey");
           final int _cursorIndexOfBaseUrl = CursorUtil.getColumnIndexOrThrow(_cursor, "baseUrl");
+          final int _cursorIndexOfApiType = CursorUtil.getColumnIndexOrThrow(_cursor, "apiType");
           final int _cursorIndexOfIsDefault = CursorUtil.getColumnIndexOrThrow(_cursor, "isDefault");
           final ConfigEntity _result;
           if (_cursor.moveToFirst()) {
@@ -344,11 +353,13 @@ public final class ConfigDao_Impl implements ConfigDao {
             _tmpApiKey = _cursor.getString(_cursorIndexOfApiKey);
             final String _tmpBaseUrl;
             _tmpBaseUrl = _cursor.getString(_cursorIndexOfBaseUrl);
+            final String _tmpApiType;
+            _tmpApiType = _cursor.getString(_cursorIndexOfApiType);
             final boolean _tmpIsDefault;
             final int _tmp;
             _tmp = _cursor.getInt(_cursorIndexOfIsDefault);
             _tmpIsDefault = _tmp != 0;
-            _result = new ConfigEntity(_tmpId,_tmpName,_tmpModelId,_tmpApiKey,_tmpBaseUrl,_tmpIsDefault);
+            _result = new ConfigEntity(_tmpId,_tmpName,_tmpModelId,_tmpApiKey,_tmpBaseUrl,_tmpApiType,_tmpIsDefault);
           } else {
             _result = null;
           }

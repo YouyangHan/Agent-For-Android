@@ -6,5 +6,6 @@ data class ModelConfig(
     val modelId: String,
     val apiKey: String,
     val baseUrl: String,
+    val apiType: String = "openai",  // "openai" or "anthropic"
     val isDefault: Boolean = false
 )
