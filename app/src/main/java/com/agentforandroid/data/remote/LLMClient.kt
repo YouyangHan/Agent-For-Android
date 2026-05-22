@@ -1,8 +1,10 @@
 package com.agentforandroid.data.remote
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOn
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -110,7 +112,7 @@ class LLMClient {
             trySend(LLMResult.Error("请求出错: ${e.localizedMessage ?: "未知错误"}"))
         }
         close()
-    }
+    }.flowOn(Dispatchers.IO)
 
     fun streamChatAnthropic(request: LLMRequest): Flow<LLMResult> = callbackFlow {
         // Separate system prompt from messages (Anthropic handles system differently)
@@ -238,7 +240,7 @@ class LLMClient {
             trySend(LLMResult.Error("请求出错: ${e.localizedMessage ?: "未知错误"}"))
         }
         close()
-    }
+    }.flowOn(Dispatchers.IO)
 
     fun shutdown() {
         client.dispatcher.executorService.shutdown()
