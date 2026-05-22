@@ -66,6 +66,7 @@ fun ChatScreen(
     }
 
     Scaffold(
+        modifier = Modifier.windowInsetsPadding(WindowInsets.ime),
         topBar = {
             TopAppBar(
                 title = { Text("Agent For Android") },
