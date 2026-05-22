@@ -33,6 +33,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private var currentSession: ChatSession? = null
 
     private var selectedPersonality: Skill? = null
+    private var selectedConfigId: String? = null
 
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages: StateFlow<List<Message>> = _messages.asStateFlow()
@@ -40,11 +41,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _personalitySkills = MutableStateFlow<List<Skill>>(emptyList())
     val personalitySkills: StateFlow<List<Skill>> = _personalitySkills.asStateFlow()
 
-    fun setPersonality(skill: Skill?) {
-        selectedPersonality = skill
-    }
-
+    fun setPersonality(skill: Skill?) { selectedPersonality = skill }
     fun getPersonality(): Skill? = selectedPersonality
+    fun setSelectedConfigId(id: String) { selectedConfigId = id }
+    fun getSelectedConfigId(): String? = selectedConfigId
 
     fun refreshPersonalities() {
         _personalitySkills.value = skillRepo.getPersonalitySkills()
@@ -109,8 +109,11 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     chatRepo.updateSessionTitle(session.id, title)
                 }
 
-                // Get model config
-                val config = configRepo.getDefault()
+                // Get model config (use selected or default)
+                val config = if (selectedConfigId != null)
+                    configRepo.getById(selectedConfigId!!)
+                else
+                    configRepo.getDefault()
                 if (config == null) {
                     _error.value = "请先在设置中配置一个模型"
                     _isLoading.value = false

@@ -38,17 +38,16 @@ fun ChatScreen(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var initialized by remember { mutableStateOf(false) }
     var modelDropdownExpanded by remember { mutableStateOf(false) }
-    var selectedConfigId by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(configs) {
-        if (!initialized && configs.isNotEmpty()) {
+    LaunchedEffect(Unit) {
+        if (configs.isNotEmpty()) {
+            val defaultId = configs.firstOrNull { it.isDefault }?.id ?: configs.first().id
+            chatVM.setSelectedConfigId(defaultId)
             chatVM.initOrCreateSession(
-                modelConfigId = configs.firstOrNull { it.isDefault }?.id ?: configs.first().id,
+                modelConfigId = defaultId,
                 enabledSkills = skills.filter { it.enabled }.map { it.name }
             )
-            initialized = true
         }
     }
 
@@ -74,17 +73,18 @@ fun ChatScreen(
         },
         bottomBar = {
             Column {
-                // Model selector row (always visible)
-                if (configs.isNotEmpty()) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                        modifier = Modifier.fillMaxWidth()
+                // Model + Personality in one row (always visible)
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            val currentConfig = configs.find { it.id == selectedConfigId }
+                        // Model selector
+                        if (configs.isNotEmpty()) {
+                            val currentConfig = configs.find { it.id == chatVM.getSelectedConfigId() }
                                 ?: configs.firstOrNull { it.isDefault }
                                 ?: configs.first()
                             Box {
@@ -94,7 +94,7 @@ fun ChatScreen(
                                     Text(currentConfig.name,
                                         style = MaterialTheme.typography.labelSmall)
                                     Icon(Icons.Default.ArrowDropDown, contentDescription = null,
-                                        modifier = Modifier.size(14.dp))
+                                        modifier = Modifier.size(12.dp))
                                 }
                                 DropdownMenu(
                                     expanded = modelDropdownExpanded,
@@ -109,32 +109,24 @@ fun ChatScreen(
                                                 )
                                             },
                                             onClick = {
-                                                selectedConfigId = config.id
+                                                chatVM.setSelectedConfigId(config.id)
                                                 configVM.setDefault(config.id)
                                                 modelDropdownExpanded = false
-                                                initialized = false
                                             }
                                         )
                                     }
                                 }
                             }
                         }
-                    }
-                }
 
-                // Personality selector row (always visible)
-                val personalities = skills.filter { it.isPersonality && it.enabled }
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("|", style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline)
+                        Spacer(modifier = Modifier.width(4.dp))
+
+                        // Personality selector
                         var personalityExpanded by remember { mutableStateOf(false) }
                         val currentPersonality = chatVM.getPersonality()
-
                         Box {
                             TextButton(onClick = { personalityExpanded = true },
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
@@ -144,7 +136,7 @@ fun ChatScreen(
                                     style = MaterialTheme.typography.labelSmall
                                 )
                                 Icon(Icons.Default.ArrowDropDown, contentDescription = null,
-                                    modifier = Modifier.size(14.dp))
+                                    modifier = Modifier.size(12.dp))
                             }
                             DropdownMenu(
                                 expanded = personalityExpanded,
@@ -157,6 +149,7 @@ fun ChatScreen(
                                         personalityExpanded = false
                                     }
                                 )
+                                val personalities = skills.filter { it.isPersonality && it.enabled }
                                 personalities.forEach { skill ->
                                     DropdownMenuItem(
                                         text = { Text(skill.personalityName, style = MaterialTheme.typography.bodySmall) },

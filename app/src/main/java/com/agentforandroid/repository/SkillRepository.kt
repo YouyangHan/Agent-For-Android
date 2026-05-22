@@ -19,7 +19,7 @@ class SkillRepository private constructor(private val context: Context) {
     private var loaded = false
 
     fun getUserSkillsPath(): String {
-        val default = SkillLoader.getDefaultUserPath()
+        val default = SkillLoader.getDefaultUserPath(context)
         return prefs.getString("user_skills_path", default) ?: default
     }
 

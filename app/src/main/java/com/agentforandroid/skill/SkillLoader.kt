@@ -22,9 +22,11 @@ object SkillLoader {
         return skills.sortedBy { it.displayName }
     }
 
-    fun getDefaultUserPath(): String {
-        val external = Environment.getExternalStorageDirectory()
-        return File(external, "agent_skills").absolutePath
+    fun getDefaultUserPath(context: Context): String {
+        // Use app-specific external storage — always writable, no permission needed
+        val dir = context.getExternalFilesDir("skills")
+        if (dir != null && !dir.exists()) dir.mkdirs()
+        return dir?.absolutePath ?: File(context.filesDir, "skills").absolutePath
     }
 
     private fun loadFromAssets(context: Context): List<Skill> {
