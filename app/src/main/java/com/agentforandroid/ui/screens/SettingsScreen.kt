@@ -155,7 +155,7 @@ private fun ConfigDialog(
                     placeholder = { Text("gpt-4 / deepseek-chat") })
                 OutlinedTextField(
                     value = apiKey, onValueChange = { apiKey = it },
-                    label = { Text("API Key") }, singleLine = true,
+                    label = { Text("API Key") }, maxLines = 3,
                     visualTransformation = if (showKey) VisualTransformation.None
                         else PasswordVisualTransformation(),
                     trailingIcon = {

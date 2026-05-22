@@ -116,10 +116,63 @@ fun ChatScreen(
             )
         },
         bottomBar = {
-            MessageInput(
-                onSend = { text -> chatVM.sendMessage(text) },
-                enabled = !isLoading
-            )
+            Column {
+                // Personality selector row
+                val personalities = skills.filter { it.isPersonality && it.enabled }
+                if (personalities.isNotEmpty()) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("性格:", style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.secondary)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            var personalityExpanded by remember { mutableStateOf(false) }
+                            val currentPersonality = chatVM.getPersonality()
+
+                            Box {
+                                TextButton(onClick = { personalityExpanded = true }) {
+                                    Text(
+                                        currentPersonality?.personalityName ?: "Default",
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                    Icon(Icons.Default.ArrowDropDown, contentDescription = null,
+                                        modifier = Modifier.size(16.dp))
+                                }
+                                DropdownMenu(
+                                    expanded = personalityExpanded,
+                                    onDismissRequest = { personalityExpanded = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Default", style = MaterialTheme.typography.bodySmall) },
+                                        onClick = {
+                                            chatVM.setPersonality(null)
+                                            personalityExpanded = false
+                                        }
+                                    )
+                                    personalities.forEach { skill ->
+                                        DropdownMenuItem(
+                                            text = { Text(skill.personalityName, style = MaterialTheme.typography.bodySmall) },
+                                            onClick = {
+                                                chatVM.setPersonality(skill)
+                                                personalityExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                MessageInput(
+                    onSend = { text -> chatVM.sendMessage(text) },
+                    enabled = !isLoading
+                )
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->

@@ -39,11 +39,19 @@ class SkillRepository private constructor(private val context: Context) {
         val userPath = getUserSkillsPath()
         val loaded = SkillLoader.loadAll(context.applicationContext, userPath)
         val enabledSet = prefs.getStringSet("enabled_skills", emptySet()) ?: emptySet()
-
+        val personalitySet = prefs.getStringSet("personality_skills", emptySet()) ?: emptySet()
+        val personalityNames = loadPersonalityNames()
         val isFirstLaunch = prefs.getBoolean("first_launch", true)
+
         val skillsWithState = loaded.map { skill ->
-            val enabled = if (isFirstLaunch) true else enabledSet.contains(skill.name)
-            skill.copy(enabled = enabled)
+            val enabled = if (isFirstLaunch) false else enabledSet.contains(skill.name)
+            val isPersonality = personalitySet.contains(skill.name)
+            val pName = personalityNames[skill.name] ?: ""
+            skill.copy(
+                enabled = enabled,
+                isPersonality = isPersonality,
+                personalityName = pName
+            )
         }
         _skills.value = skillsWithState
 
@@ -64,6 +72,30 @@ class SkillRepository private constructor(private val context: Context) {
 
     fun getBuiltinSkills(): List<Skill> = _skills.value.filter { it.isBuiltin }
     fun getUserSkills(): List<Skill> = _skills.value.filter { !it.isBuiltin }
+
+    fun getPersonalitySkills(): List<Skill> = _skills.value.filter { it.isPersonality && it.enabled }
+
+    fun togglePersonality(skillName: String, isPersonality: Boolean, personalityName: String) {
+        _skills.value = _skills.value.map {
+            if (it.name == skillName) it.copy(isPersonality = isPersonality, personalityName = personalityName) else it
+        }
+        val set = _skills.value.filter { it.isPersonality }.map { it.name }.toSet()
+        prefs.edit().putStringSet("personality_skills", set).apply()
+        // Save personality name mapping
+        val names = _skills.value.filter { it.isPersonality && it.personalityName.isNotBlank() }
+            .associate { it.name to it.personalityName }
+        prefs.edit().putString("personality_names",
+            names.entries.joinToString("||") { "${it.key}=${it.value}" }).apply()
+    }
+
+    private fun loadPersonalityNames(): Map<String, String> {
+        val raw = prefs.getString("personality_names", "") ?: ""
+        if (raw.isBlank()) return emptyMap()
+        return try {
+            raw.split("||").filter { it.contains("=") }
+                .associate { val (k, v) = it.split("=", limit = 2); k to v }
+        } catch (_: Exception) { emptyMap() }
+    }
 
     companion object {
         @Volatile

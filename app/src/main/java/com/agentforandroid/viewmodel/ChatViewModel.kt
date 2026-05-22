@@ -7,6 +7,7 @@ import com.agentforandroid.AgentApp
 import com.agentforandroid.data.remote.LLMClient
 import com.agentforandroid.model.ChatSession
 import com.agentforandroid.model.Message
+import com.agentforandroid.model.Skill
 import com.agentforandroid.repository.ChatRepository
 import com.agentforandroid.repository.ConfigRepository
 import kotlinx.coroutines.flow.*
@@ -31,15 +32,32 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     private var currentSession: ChatSession? = null
 
+    private var selectedPersonality: Skill? = null
+
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages: StateFlow<List<Message>> = _messages.asStateFlow()
+
+    private val _personalitySkills = MutableStateFlow<List<Skill>>(emptyList())
+    val personalitySkills: StateFlow<List<Skill>> = _personalitySkills.asStateFlow()
+
+    fun setPersonality(skill: Skill?) {
+        selectedPersonality = skill
+    }
+
+    fun getPersonality(): Skill? = selectedPersonality
+
+    fun refreshPersonalities() {
+        _personalitySkills.value = skillRepo.getPersonalitySkills()
+        if (selectedPersonality != null) {
+            val stillExists = _personalitySkills.value.any { it.name == selectedPersonality!!.name }
+            if (!stillExists) selectedPersonality = null
+        }
+    }
 
     companion object {
         const val BASE_SYSTEM_PROMPT =
             "You are Agent For Android, an AI assistant running on a mobile phone. " +
-            "You provide helpful, accurate responses. When Skills are active, " +
-            "use their guidance to enhance your answers. " +
-            "Use markdown formatting for code blocks, tables, and lists."
+            "You provide helpful, accurate responses."
     }
 
     suspend fun initOrCreateSession(modelConfigId: String, enabledSkills: List<String>) {
@@ -99,9 +117,19 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                // Build system prompt with skills
+                // Build system prompt with personality + skills
                 val enabledSkills = skillRepo.getEnabledSkills()
-                val systemPrompt = chatRepo.buildSystemPrompt(BASE_SYSTEM_PROMPT, enabledSkills)
+                var systemPrompt = BASE_SYSTEM_PROMPT
+
+                // Personality takes precedence - injected first
+                if (selectedPersonality != null) {
+                    val p = selectedPersonality!!
+                    val pBody = if (p.content.length > 3000) p.content.take(3000) + "\n...(truncated)" else p.content
+                    systemPrompt = pBody + "\n\n" + systemPrompt
+                }
+
+                // Regular skills appended after
+                systemPrompt = chatRepo.buildSystemPrompt(systemPrompt, enabledSkills)
 
                 // Build messages for LLM
                 val llmMessages = mutableListOf<Map<String, String>>()

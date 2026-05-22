@@ -8,5 +8,7 @@ data class Skill(
     val isBuiltin: Boolean,
     val enabled: Boolean = true,
     val displayName: String = name,
-    val displayDescription: String = description
+    val displayDescription: String = description,
+    val isPersonality: Boolean = false,
+    val personalityName: String = ""
 )

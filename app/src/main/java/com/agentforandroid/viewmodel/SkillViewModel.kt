@@ -8,7 +8,6 @@ import com.agentforandroid.repository.SkillRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 class SkillViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -26,6 +25,12 @@ class SkillViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getEnabledSkills(): List<Skill> = repository.getEnabledSkills()
+
+    fun getPersonalitySkills(): List<Skill> = repository.getPersonalitySkills()
+
+    fun togglePersonality(skillName: String, isPersonality: Boolean, personalityName: String) {
+        repository.togglePersonality(skillName, isPersonality, personalityName)
+    }
 
     fun reloadSkills() {
         repository.reloadSkills()
