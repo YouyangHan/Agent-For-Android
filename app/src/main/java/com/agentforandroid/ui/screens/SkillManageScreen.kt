@@ -40,7 +40,7 @@ fun SkillManageScreen(viewModel: SkillViewModel = viewModel()) {
 
     val builtinSkills = skills.filter { it.isBuiltin }
     val personalitySkills = skills.filter { it.isPersonality && it.enabled }
-    val userSkills = skills.filter { !it.isBuiltin && !it.isPersonality }
+    val userSkills = skills.filter { !it.isBuiltin && !(it.isPersonality && it.enabled) }
 
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree()

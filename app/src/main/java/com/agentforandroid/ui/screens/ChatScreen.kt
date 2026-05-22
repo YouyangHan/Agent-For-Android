@@ -51,6 +51,11 @@ fun ChatScreen(
         }
     }
 
+    // Refresh personality list whenever skills change
+    LaunchedEffect(skills) {
+        chatVM.refreshPersonalities()
+    }
+
     LaunchedEffect(messages.size, streamingText) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
@@ -149,7 +154,7 @@ fun ChatScreen(
                                         personalityExpanded = false
                                     }
                                 )
-                                val personalities = skills.filter { it.isPersonality && it.enabled }
+                                val personalities by chatVM.personalitySkills.collectAsState()
                                 personalities.forEach { skill ->
                                     DropdownMenuItem(
                                         text = { Text(skill.personalityName, style = MaterialTheme.typography.bodySmall) },
