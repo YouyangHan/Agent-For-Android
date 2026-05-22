@@ -6,5 +6,7 @@ data class Skill(
     val content: String,
     val sourcePath: String,
     val isBuiltin: Boolean,
-    val enabled: Boolean = true
+    val enabled: Boolean = true,
+    val displayName: String = name,
+    val displayDescription: String = description
 )

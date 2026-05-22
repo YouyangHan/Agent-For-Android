@@ -18,10 +18,26 @@ class SkillRepository private constructor(private val context: Context) {
 
     private var loaded = false
 
+    fun getUserSkillsPath(): String {
+        val default = SkillLoader.getDefaultUserPath()
+        return prefs.getString("user_skills_path", default) ?: default
+    }
+
+    fun setUserSkillsPath(path: String) {
+        prefs.edit().putString("user_skills_path", path).apply()
+        reloadSkills()
+    }
+
+    fun reloadSkills() {
+        loaded = false
+        loadSkills()
+    }
+
     fun loadSkills() {
         if (loaded) return
         loaded = true
-        val loaded = SkillLoader.loadAll(context.applicationContext)
+        val userPath = getUserSkillsPath()
+        val loaded = SkillLoader.loadAll(context.applicationContext, userPath)
         val enabledSet = prefs.getStringSet("enabled_skills", emptySet()) ?: emptySet()
 
         val isFirstLaunch = prefs.getBoolean("first_launch", true)
@@ -45,6 +61,9 @@ class SkillRepository private constructor(private val context: Context) {
     }
 
     fun getEnabledSkills(): List<Skill> = _skills.value.filter { it.enabled }
+
+    fun getBuiltinSkills(): List<Skill> = _skills.value.filter { it.isBuiltin }
+    fun getUserSkills(): List<Skill> = _skills.value.filter { !it.isBuiltin }
 
     companion object {
         @Volatile

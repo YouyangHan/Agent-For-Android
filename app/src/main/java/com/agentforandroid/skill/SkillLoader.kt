@@ -1,21 +1,30 @@
 package com.agentforandroid.skill
 
 import android.content.Context
+import android.os.Environment
 import com.agentforandroid.model.Skill
 import java.io.File
 
 object SkillLoader {
 
-    fun loadAll(context: Context): List<Skill> {
+    fun loadAll(context: Context, userSkillsPath: String? = null): List<Skill> {
         val skills = mutableListOf<Skill>()
 
         // Load built-in skills from assets
         skills.addAll(loadFromAssets(context))
 
-        // Load user skills from filesDir
+        // Load user skills from custom path (default: external storage agent_skills/)
+        skills.addAll(loadFromPath(userSkillsPath))
+
+        // Also try app-private filesDir/skills/ for backward compatibility
         skills.addAll(loadFromFiles(context))
 
-        return skills.sortedBy { it.name }
+        return skills.sortedBy { it.displayName }
+    }
+
+    fun getDefaultUserPath(): String {
+        val external = Environment.getExternalStorageDirectory()
+        return File(external, "agent_skills").absolutePath
     }
 
     private fun loadFromAssets(context: Context): List<Skill> {
@@ -37,6 +46,30 @@ object SkillLoader {
                 } catch (_: Exception) { /* Skip malformed skill */ }
             }
         } catch (_: Exception) { /* assets/skills/ not found */ }
+        return skills
+    }
+
+    private fun loadFromPath(path: String?): List<Skill> {
+        if (path.isNullOrBlank()) return emptyList()
+        val skills = mutableListOf<Skill>()
+        val skillsDir = File(path)
+        if (!skillsDir.exists() || !skillsDir.isDirectory) return skills
+
+        for (folder in skillsDir.listFiles() ?: emptyArray()) {
+            if (!folder.isDirectory) continue
+            val skillMd = File(folder, "SKILL.md")
+            if (!skillMd.exists()) continue
+
+            try {
+                val content = skillMd.readText()
+                val skill = SkillParser.parse(
+                    markdown = content,
+                    sourcePath = skillMd.absolutePath,
+                    isBuiltin = false
+                )
+                if (skill != null) skills.add(skill)
+            } catch (_: Exception) { /* Skip malformed skill */ }
+        }
         return skills
     }
 

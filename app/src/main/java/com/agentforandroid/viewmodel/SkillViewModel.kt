@@ -26,4 +26,8 @@ class SkillViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getEnabledSkills(): List<Skill> = repository.getEnabledSkills()
+
+    fun reloadSkills() {
+        repository.reloadSkills()
+    }
 }
