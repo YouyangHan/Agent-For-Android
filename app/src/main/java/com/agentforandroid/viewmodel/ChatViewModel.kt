@@ -20,6 +20,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val chatRepo = ChatRepository(app.database)
     private val configRepo = ConfigRepository(app.database)
     private val skillRepo = com.agentforandroid.repository.SkillRepository.getInstance(application)
+    private val toolExecutor = com.agentforandroid.tool.ToolExecutor(application)
 
     private val prefs = application.getSharedPreferences("chat_prefs", android.content.Context.MODE_PRIVATE)
 
@@ -156,8 +157,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     systemPrompt = pBody + "\n\n" + systemPrompt
                 }
 
-                // Regular skills appended after
+                // Regular skills + tool instructions appended after
                 systemPrompt = chatRepo.buildSystemPrompt(systemPrompt, enabledSkills)
+                systemPrompt += "\n\n" + com.agentforandroid.tool.ToolExecutor.TOOL_DESCRIPTIONS
 
                 // Build messages for LLM
                 val llmMessages = mutableListOf<Map<String, String>>()
@@ -180,14 +182,33 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                             _error.value = result.message
                         }
                         is LLMClient.LLMResult.Done -> {
-                            val assistantMsg = Message(
-                                id = UUID.randomUUID().toString(),
-                                sessionId = session.id,
-                                role = "assistant",
-                                content = fullResponse.toString()
-                            )
-                            chatRepo.saveMessage(assistantMsg)
-                            _messages.value = _messages.value + assistantMsg
+                            val responseText = fullResponse.toString()
+
+                            // Check for tool calls in the response
+                            if (toolExecutor.hasToolCall(responseText)) {
+                                val (cleanText, toolResults) = toolExecutor.executeToolCalls(responseText)
+                                val displayText = if (cleanText.isNotBlank()) cleanText else "🔧 执行工具..."
+
+                                // Save AI response with tool results appended
+                                val combined = "$displayText\n\n$toolResults"
+                                val assistantMsg = Message(
+                                    id = UUID.randomUUID().toString(),
+                                    sessionId = session.id,
+                                    role = "assistant",
+                                    content = combined
+                                )
+                                chatRepo.saveMessage(assistantMsg)
+                                _messages.value = _messages.value + assistantMsg
+                            } else {
+                                val assistantMsg = Message(
+                                    id = UUID.randomUUID().toString(),
+                                    sessionId = session.id,
+                                    role = "assistant",
+                                    content = responseText
+                                )
+                                chatRepo.saveMessage(assistantMsg)
+                                _messages.value = _messages.value + assistantMsg
+                            }
                         }
                     }
                 }
