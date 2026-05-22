@@ -47,7 +47,11 @@ class ChatRepository(private val database: AppDatabase) {
     fun buildSystemPrompt(basePrompt: String, skills: List<Skill>): String {
         if (skills.isEmpty()) return basePrompt
         val skillsSection = skills.joinToString("\n\n") { skill ->
-            "[Skill: ${skill.name}]\n${skill.content}"
+            // Truncate to avoid blowing up the request context
+            val body = if (skill.content.length > 2000)
+                skill.content.take(2000) + "\n...(truncated)"
+            else skill.content
+            "[Skill: ${skill.name}]\n${skill.description}\n$body"
         }
         return "$basePrompt\n\n## Active Skills\n\n$skillsSection"
     }

@@ -136,7 +136,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
             } catch (e: Exception) {
-                _error.value = "发送失败: ${e.localizedMessage}"
+                val msg = e.localizedMessage ?: e.message ?: "无详情"
+                _error.value = "[${e.javaClass.simpleName}] $msg"
             } finally {
                 _streamingText.value = ""
                 _isLoading.value = false
