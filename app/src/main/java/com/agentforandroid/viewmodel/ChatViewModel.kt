@@ -21,6 +21,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val configRepo = ConfigRepository(app.database)
     private val skillRepo = com.agentforandroid.repository.SkillRepository.getInstance(application)
 
+    private val prefs = application.getSharedPreferences("chat_prefs", android.content.Context.MODE_PRIVATE)
+
     private val _streamingText = MutableStateFlow("")
     val streamingText: StateFlow<String> = _streamingText.asStateFlow()
 
@@ -41,10 +43,31 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _personalitySkills = MutableStateFlow<List<Skill>>(emptyList())
     val personalitySkills: StateFlow<List<Skill>> = _personalitySkills.asStateFlow()
 
-    fun setPersonality(skill: Skill?) { selectedPersonality = skill }
-    fun getPersonality(): Skill? = selectedPersonality
-    fun setSelectedConfigId(id: String) { selectedConfigId = id }
-    fun getSelectedConfigId(): String? = selectedConfigId
+    // Persist selected config across restarts
+    fun setSelectedConfigId(id: String) {
+        selectedConfigId = id
+        prefs.edit().putString("last_config_id", id).apply()
+    }
+    fun getSelectedConfigId(): String? {
+        if (selectedConfigId == null) {
+            selectedConfigId = prefs.getString("last_config_id", null)
+        }
+        return selectedConfigId
+    }
+
+    // Persist selected personality across restarts
+    fun setPersonality(skill: Skill?) {
+        selectedPersonality = skill
+        prefs.edit().putString("last_personality", skill?.name ?: "").apply()
+    }
+    fun getPersonality(): Skill? { return selectedPersonality }
+
+    fun restorePersonality() {
+        val savedName = prefs.getString("last_personality", "") ?: ""
+        if (savedName.isNotBlank()) {
+            selectedPersonality = skillRepo.skills.value.find { it.name == savedName && it.isPersonality }
+        }
+    }
 
     fun refreshPersonalities() {
         _personalitySkills.value = skillRepo.getPersonalitySkills()

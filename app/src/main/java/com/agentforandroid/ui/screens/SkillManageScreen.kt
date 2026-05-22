@@ -231,12 +231,15 @@ private fun PersonalitySkillCard(
                         color = MaterialTheme.colorScheme.secondary)
                 }
             }
-            TextButton(onClick = onRemovePersonality, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Default.Star, contentDescription = null, modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.error)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("取消性格", style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error)
+            // Only show remove button for non-pinned personalities
+            if (!com.agentforandroid.skill.SkillParser.pinnedPersonalities.contains(skill.name)) {
+                TextButton(onClick = onRemovePersonality, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Default.Star, contentDescription = null, modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.error)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("取消性格", style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error)
+                }
             }
         }
     }
