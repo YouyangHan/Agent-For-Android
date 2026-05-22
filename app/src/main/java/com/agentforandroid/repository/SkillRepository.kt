@@ -43,14 +43,20 @@ class SkillRepository private constructor(private val context: Context) {
         val personalityNames = loadPersonalityNames()
         val isFirstLaunch = prefs.getBoolean("first_launch", true)
 
+        val pinnedSet = com.agentforandroid.skill.SkillParser.pinnedPersonalities
         val skillsWithState = loaded.map { skill ->
             val enabled = if (isFirstLaunch) false else enabledSet.contains(skill.name)
-            val isPersonality = personalitySet.contains(skill.name)
-            val pName = personalityNames[skill.name] ?: ""
+            // Keep personality state from parser if pinned, else use stored pref
+            val isPinned = pinnedSet.contains(skill.name)
+            val isPersonality = if (isPinned) true
+                else if (skill.isPersonality) true  // keep parser-set value
+                else personalitySet.contains(skill.name)
+            val pName = if (isPinned && skill.personalityName.isNotBlank()) skill.personalityName
+                else personalityNames[skill.name] ?: skill.personalityName
             skill.copy(
                 enabled = enabled,
                 isPersonality = isPersonality,
-                personalityName = pName
+                personalityName = pName.ifBlank { skill.displayName }
             )
         }
         _skills.value = skillsWithState
