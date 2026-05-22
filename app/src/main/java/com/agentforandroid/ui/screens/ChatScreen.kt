@@ -74,7 +74,7 @@ fun ChatScreen(
         modifier = Modifier.windowInsetsPadding(WindowInsets.ime),
         topBar = {
             TopAppBar(
-                title = { Text("Agent For Android") }
+                title = { Text("Agent Yang") }
             )
         },
         bottomBar = {

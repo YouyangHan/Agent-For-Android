@@ -1,8 +1,11 @@
 R_DEF: Internal format may change without notice
 local
+drawable donate_alipay
+drawable donate_wx
 mipmap ic_launcher
 string app_name
 string tab_chat
 string tab_settings
 string tab_skills
+string version
 style Theme.AgentForAndroid

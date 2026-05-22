@@ -1,5 +1,6 @@
 package com.agentforandroid.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,21 +14,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.agentforandroid.model.ModelConfig
-import com.agentforandroid.repository.SkillRepository
 import com.agentforandroid.viewmodel.ConfigViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
     val configs by viewModel.configs.collectAsState()
-    val context = LocalContext.current
-    val skillRepo = remember { SkillRepository.getInstance(context) }
     var selectedTab by remember { mutableStateOf(0) }
     var showAddDialog by remember { mutableStateOf(false) }
     var editingConfig by remember { mutableStateOf<ModelConfig?>(null) }
@@ -78,29 +75,73 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
             } else {
                 // General settings
                 LazyColumn {
+                    // Donate section
                     item {
                         Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text("Skills 存储路径", style = MaterialTheme.typography.titleSmall)
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text("存放导入的 Skill 文件夹的目录",
+                                Text("支持开发者", style = MaterialTheme.typography.titleSmall)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("如果觉得好用，请我喝杯咖啡吧 ☕",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.secondary)
-                                Spacer(modifier = Modifier.height(8.dp))
-                                var path by remember { mutableStateOf(skillRepo.getUserSkillsPath()) }
-                                OutlinedTextField(
-                                    value = path,
-                                    onValueChange = { path = it },
-                                    label = { Text("路径") },
-                                    singleLine = true,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Button(onClick = {
-                                    skillRepo.setUserSkillsPath(path.trim())
-                                }, modifier = Modifier.fillMaxWidth()) {
-                                    Text("保存路径")
+
+                                var showDonate by remember { mutableStateOf(false) }
+                                var qrPage by remember { mutableStateOf(0) }
+
+                                if (!showDonate) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    OutlinedButton(onClick = { showDonate = true }) {
+                                        Text("❤️ 捐赠")
+                                    }
+                                } else {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    // QR code image - tap to switch between WeChat and Alipay
+                                    val qrRes = if (qrPage == 0) com.agentforandroid.R.drawable.donate_wx
+                                        else com.agentforandroid.R.drawable.donate_alipay
+                                    val label = if (qrPage == 0) "微信" else "支付宝"
+
+                                    Text(label, style = MaterialTheme.typography.labelMedium,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = MaterialTheme.colorScheme.primary)
+
+                                    Image(
+                                        painter = androidx.compose.ui.res.painterResource(qrRes),
+                                        contentDescription = label,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(280.dp)
+                                            .clickable { qrPage = 1 - qrPage }  // tap to switch
+                                    )
+
+                                    Text("点击图片切换", style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.fillMaxWidth())
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    TextButton(onClick = { showDonate = false }) {
+                                        Text("收起")
+                                    }
                                 }
+                            }
+                        }
+                    }
+
+                    // About section
+                    item {
+                        Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text("关于", style = MaterialTheme.typography.titleSmall)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("Agent Yang",
+                                    style = MaterialTheme.typography.titleMedium)
+                                Text("版本: V1.0.0.0",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.secondary)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text("基于 Claude Code Skill 系统的 AI Agent",
+                                    style = MaterialTheme.typography.bodySmall)
+                                Text("支持多模型、Skill 扩展、手机工具调用",
+                                    style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }

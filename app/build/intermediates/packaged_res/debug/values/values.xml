@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Agent For Android</string>
+    <string name="app_name">Agent Yang</string>
     <string name="tab_chat">对话</string>
     <string name="tab_settings">设置</string>
     <string name="tab_skills">Skills</string>
+    <string name="version">V1.0.0.0</string>
     <style name="Theme.AgentForAndroid" parent="android:Theme.Material.Light.NoActionBar"/>
 </resources>
