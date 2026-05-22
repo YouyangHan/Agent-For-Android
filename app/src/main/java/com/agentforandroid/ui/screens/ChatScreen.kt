@@ -1,0 +1,142 @@
+package com.agentforandroid.ui.screens
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.agentforandroid.model.Message
+import com.agentforandroid.ui.components.ChatBubble
+import com.agentforandroid.ui.components.MessageInput
+import com.agentforandroid.viewmodel.ChatViewModel
+import com.agentforandroid.viewmodel.ConfigViewModel
+import com.agentforandroid.viewmodel.SkillViewModel
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChatScreen(
+    chatVM: ChatViewModel = viewModel(),
+    configVM: ConfigViewModel = viewModel(),
+    skillVM: SkillViewModel = viewModel()
+) {
+    val messages by chatVM.messages.collectAsState()
+    val streamingText by chatVM.streamingText.collectAsState()
+    val isLoading by chatVM.isLoading.collectAsState()
+    val error by chatVM.error.collectAsState()
+    val configs by configVM.configs.collectAsState()
+    val skills by skillVM.skills.collectAsState()
+
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    var initialized by remember { mutableStateOf(false) }
+
+    LaunchedEffect(configs) {
+        if (!initialized && configs.isNotEmpty()) {
+            chatVM.initOrCreateSession(
+                modelConfigId = configs.firstOrNull { it.isDefault }?.id ?: configs.first().id,
+                enabledSkills = skills.filter { it.enabled }.map { it.name }
+            )
+            initialized = true
+        }
+    }
+
+    LaunchedEffect(messages.size, streamingText) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
+        }
+    }
+
+    LaunchedEffect(error) {
+        error?.let {
+            snackbarHostState.showSnackbar(it)
+            chatVM.clearError()
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Agent For Android") },
+                actions = {
+                    val defaultConfig = configs.firstOrNull { it.isDefault }
+                    if (defaultConfig != null) {
+                        Text(
+                            defaultConfig.name,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+            )
+        },
+        bottomBar = {
+            MessageInput(
+                onSend = { text -> chatVM.sendMessage(text) },
+                enabled = !isLoading
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
+        Column(modifier = Modifier.padding(padding)) {
+            // Active skills indicator
+            val activeSkills = skills.filter { it.enabled }
+            if (activeSkills.isNotEmpty()) {
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        "Skills: ${activeSkills.joinToString(", ") { it.name }}",
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(messages, key = { it.id }) { msg ->
+                    ChatBubble(
+                        content = msg.content,
+                        isUser = msg.role == "user"
+                    )
+                }
+
+                // Streaming text item
+                if (streamingText.isNotEmpty()) {
+                    item(key = "streaming") {
+                        ChatBubble(content = streamingText, isUser = false)
+                    }
+                }
+
+                // Loading indicator
+                if (isLoading && streamingText.isEmpty()) {
+                    item(key = "loading") {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
