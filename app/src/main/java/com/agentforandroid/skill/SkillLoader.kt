@@ -1,7 +1,6 @@
 package com.agentforandroid.skill
 
 import android.content.Context
-import android.os.Environment
 import com.agentforandroid.model.Skill
 import java.io.File
 
