@@ -19,6 +19,12 @@ class LLMClient {
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor { chain ->
+            val req = chain.request().newBuilder()
+                .header("User-Agent", "claude-code/1.0")
+                .build()
+            chain.proceed(req)
+        }
         .build()
 
     data class LLMRequest(
@@ -85,18 +91,22 @@ class LLMClient {
             var hasContent = false
             while (!source.exhausted()) {
                 val line = source.readUtf8Line() ?: break
-                if (line.startsWith("data: ")) {
-                    val json = line.removePrefix("data: ").trim()
+                if (line.startsWith("data:")) {
+                    val json = line.removePrefix("data:").trim().removePrefix(" ")
                     if (json == "[DONE]") continue
                     try {
-                        val delta = JSONObject(json)
+                        val deltaObj = JSONObject(json)
                             .optJSONArray("choices")
                             ?.optJSONObject(0)
                             ?.optJSONObject("delta")
-                            ?.optString("content", "") ?: ""
-                        if (delta.isNotEmpty()) {
+                        var text = deltaObj?.optString("content", "") ?: ""
+                        // Fallback: some APIs (Kimi Coding) use reasoning_content
+                        if (text.isEmpty()) {
+                            text = deltaObj?.optString("reasoning_content", "") ?: ""
+                        }
+                        if (text.isNotEmpty()) {
                             hasContent = true
-                            trySend(LLMResult.Chunk(delta))
+                            trySend(LLMResult.Chunk(text))
                         }
                     } catch (_: Exception) { /* skip bad chunks */ }
                 }
@@ -186,8 +196,8 @@ class LLMClient {
             var hasContent = false
             while (!source.exhausted()) {
                 val line = source.readUtf8Line() ?: break
-                if (line.startsWith("data: ")) {
-                    val json = line.removePrefix("data: ").trim()
+                if (line.startsWith("data:")) {
+                    val json = line.removePrefix("data:").trim().removePrefix(" ")
                     try {
                         val event = JSONObject(json)
 
@@ -211,7 +221,10 @@ class LLMClient {
                             val choices = event.optJSONArray("choices")
                             if (choices != null && choices.length() > 0) {
                                 val delta = choices.optJSONObject(0)?.optJSONObject("delta")
-                                val text = delta?.optString("content", "") ?: ""
+                                var text = delta?.optString("content", "") ?: ""
+                                if (text.isEmpty()) {
+                                    text = delta?.optString("reasoning_content", "") ?: ""
+                                }
                                 if (text.isNotEmpty()) {
                                     hasContent = true
                                     trySend(LLMResult.Chunk(text))
