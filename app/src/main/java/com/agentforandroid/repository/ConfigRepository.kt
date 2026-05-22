@@ -23,7 +23,7 @@ class ConfigRepository(private val database: AppDatabase) {
         modelId: String,
         apiKey: String,
         baseUrl: String,
-        apiType: String = "openai"
+        apiType: String = "anthropic"
     ): ModelConfig {
         val config = ModelConfig(
             id = UUID.randomUUID().toString(),

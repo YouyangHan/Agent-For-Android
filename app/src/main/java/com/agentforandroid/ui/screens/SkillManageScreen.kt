@@ -13,8 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,7 +34,6 @@ fun SkillManageScreen(viewModel: SkillViewModel = viewModel()) {
     val repo = remember { SkillRepository.getInstance(context) }
     var selectedTab by remember { mutableStateOf(0) }
     var previewSkill by remember { mutableStateOf<Skill?>(null) }
-    var showPathDialog by remember { mutableStateOf(false) }
     var showPersonalityDialog by remember { mutableStateOf<Skill?>(null) }
 
     val builtinSkills = skills.filter { it.isBuiltin }
@@ -60,18 +57,8 @@ fun SkillManageScreen(viewModel: SkillViewModel = viewModel()) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Skill 管理") },
-                actions = {
-                    IconButton(onClick = { showPathDialog = true }) {
-                        Icon(Icons.Default.Settings, contentDescription = "路径")
-                    }
-                }
+                title = { Text("Skill 管理") }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { showPathDialog = true }) {
-                Icon(Icons.Default.Edit, contentDescription = "路径设置")
-            }
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
@@ -153,18 +140,6 @@ fun SkillManageScreen(viewModel: SkillViewModel = viewModel()) {
                 }
             }
         }
-    }
-
-    // Path edit dialog
-    if (showPathDialog) {
-        PathEditDialog(
-            currentPath = repo.getUserSkillsPath(),
-            onDismiss = { showPathDialog = false },
-            onConfirm = { newPath ->
-                repo.setUserSkillsPath(newPath)
-                showPathDialog = false
-            }
-        )
     }
 
     // Personality dialog
