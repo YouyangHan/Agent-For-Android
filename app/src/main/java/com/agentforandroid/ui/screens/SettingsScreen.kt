@@ -29,6 +29,11 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("模型配置") })
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showAddDialog = true }) {
+                Icon(Icons.Default.Add, contentDescription = "添加")
+            }
         }
     ) { padding ->
         if (configs.isEmpty()) {
@@ -56,13 +61,6 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
                     )
                 }
             }
-        }
-
-        FloatingActionButton(
-            onClick = { showAddDialog = true },
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "添加")
         }
     }
 

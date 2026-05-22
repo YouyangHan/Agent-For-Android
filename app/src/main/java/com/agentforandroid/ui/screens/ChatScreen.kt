@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,6 +39,8 @@ fun ChatScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var initialized by remember { mutableStateOf(false) }
+    var modelDropdownExpanded by remember { mutableStateOf(false) }
+    var selectedConfigId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(configs) {
         if (!initialized && configs.isNotEmpty()) {
@@ -66,13 +70,46 @@ fun ChatScreen(
             TopAppBar(
                 title = { Text("Agent For Android") },
                 actions = {
-                    val defaultConfig = configs.firstOrNull { it.isDefault }
-                    if (defaultConfig != null) {
-                        Text(
-                            defaultConfig.name,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
+                    if (configs.isNotEmpty()) {
+                        val currentConfig = configs.find { it.id == selectedConfigId }
+                            ?: configs.firstOrNull { it.isDefault }
+                            ?: configs.first()
+                        Box {
+                            TextButton(onClick = { modelDropdownExpanded = true }) {
+                                Text(currentConfig.name,
+                                    style = MaterialTheme.typography.labelMedium)
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            }
+                            DropdownMenu(
+                                expanded = modelDropdownExpanded,
+                                onDismissRequest = { modelDropdownExpanded = false }
+                            ) {
+                                configs.forEach { config ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                "${config.name} ${if (config.isDefault) "✓" else ""}",
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                        },
+                                        onClick = {
+                                            selectedConfigId = config.id
+                                            modelDropdownExpanded = false
+                                            // Switch to this model for new conversations
+                                            configVM.setDefault(config.id)
+                                            initialized = false // trigger re-init
+                                        },
+                                        leadingIcon = {
+                                            if (config.id == currentConfig.id) {
+                                                Icon(Icons.Default.ArrowDropDown,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp))
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                 }
