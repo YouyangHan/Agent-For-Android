@@ -69,98 +69,50 @@ fun ChatScreen(
         modifier = Modifier.windowInsetsPadding(WindowInsets.ime),
         topBar = {
             TopAppBar(
-                title = { Text("Agent For Android") },
-                actions = {
-                    if (configs.isNotEmpty()) {
-                        val currentConfig = configs.find { it.id == selectedConfigId }
-                            ?: configs.firstOrNull { it.isDefault }
-                            ?: configs.first()
-                        Box {
-                            TextButton(onClick = { modelDropdownExpanded = true }) {
-                                Text(currentConfig.name,
-                                    style = MaterialTheme.typography.labelMedium)
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                            }
-                            DropdownMenu(
-                                expanded = modelDropdownExpanded,
-                                onDismissRequest = { modelDropdownExpanded = false }
-                            ) {
-                                configs.forEach { config ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                "${config.name} ${if (config.isDefault) "✓" else ""}",
-                                                style = MaterialTheme.typography.bodySmall
-                                            )
-                                        },
-                                        onClick = {
-                                            selectedConfigId = config.id
-                                            modelDropdownExpanded = false
-                                            // Switch to this model for new conversations
-                                            configVM.setDefault(config.id)
-                                            initialized = false // trigger re-init
-                                        },
-                                        leadingIcon = {
-                                            if (config.id == currentConfig.id) {
-                                                Icon(Icons.Default.ArrowDropDown,
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(16.dp))
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
+                title = { Text("Agent For Android") }
             )
         },
         bottomBar = {
             Column {
-                // Personality selector row
-                val personalities = skills.filter { it.isPersonality && it.enabled }
-                if (personalities.isNotEmpty()) {
+                // Model selector row (always visible)
+                if (configs.isNotEmpty()) {
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("性格:", style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.secondary)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            var personalityExpanded by remember { mutableStateOf(false) }
-                            val currentPersonality = chatVM.getPersonality()
-
+                            val currentConfig = configs.find { it.id == selectedConfigId }
+                                ?: configs.firstOrNull { it.isDefault }
+                                ?: configs.first()
                             Box {
-                                TextButton(onClick = { personalityExpanded = true }) {
-                                    Text(
-                                        currentPersonality?.personalityName ?: "Default",
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
+                                TextButton(onClick = { modelDropdownExpanded = true },
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                                ) {
+                                    Text(currentConfig.name,
+                                        style = MaterialTheme.typography.labelSmall)
                                     Icon(Icons.Default.ArrowDropDown, contentDescription = null,
-                                        modifier = Modifier.size(16.dp))
+                                        modifier = Modifier.size(14.dp))
                                 }
                                 DropdownMenu(
-                                    expanded = personalityExpanded,
-                                    onDismissRequest = { personalityExpanded = false }
+                                    expanded = modelDropdownExpanded,
+                                    onDismissRequest = { modelDropdownExpanded = false }
                                 ) {
-                                    DropdownMenuItem(
-                                        text = { Text("Default", style = MaterialTheme.typography.bodySmall) },
-                                        onClick = {
-                                            chatVM.setPersonality(null)
-                                            personalityExpanded = false
-                                        }
-                                    )
-                                    personalities.forEach { skill ->
+                                    configs.forEach { config ->
                                         DropdownMenuItem(
-                                            text = { Text(skill.personalityName, style = MaterialTheme.typography.bodySmall) },
+                                            text = {
+                                                Text(
+                                                    "${config.name} ${if (config.isDefault) "✓" else ""}",
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
+                                            },
                                             onClick = {
-                                                chatVM.setPersonality(skill)
-                                                personalityExpanded = false
+                                                selectedConfigId = config.id
+                                                configVM.setDefault(config.id)
+                                                modelDropdownExpanded = false
+                                                initialized = false
                                             }
                                         )
                                     }
@@ -169,6 +121,56 @@ fun ChatScreen(
                         }
                     }
                 }
+
+                // Personality selector row (always visible)
+                val personalities = skills.filter { it.isPersonality && it.enabled }
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        var personalityExpanded by remember { mutableStateOf(false) }
+                        val currentPersonality = chatVM.getPersonality()
+
+                        Box {
+                            TextButton(onClick = { personalityExpanded = true },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                            ) {
+                                Text(
+                                    currentPersonality?.personalityName ?: "Default",
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null,
+                                    modifier = Modifier.size(14.dp))
+                            }
+                            DropdownMenu(
+                                expanded = personalityExpanded,
+                                onDismissRequest = { personalityExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Default", style = MaterialTheme.typography.bodySmall) },
+                                    onClick = {
+                                        chatVM.setPersonality(null)
+                                        personalityExpanded = false
+                                    }
+                                )
+                                personalities.forEach { skill ->
+                                    DropdownMenuItem(
+                                        text = { Text(skill.personalityName, style = MaterialTheme.typography.bodySmall) },
+                                        onClick = {
+                                            chatVM.setPersonality(skill)
+                                            personalityExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 MessageInput(
                     onSend = { text -> chatVM.sendMessage(text) },
                     enabled = !isLoading
