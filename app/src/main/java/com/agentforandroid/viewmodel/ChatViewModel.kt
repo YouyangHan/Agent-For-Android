@@ -1,0 +1,137 @@
+package com.agentforandroid.viewmodel
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.agentforandroid.AgentApp
+import com.agentforandroid.data.remote.LLMClient
+import com.agentforandroid.model.ChatSession
+import com.agentforandroid.model.Message
+import com.agentforandroid.repository.ChatRepository
+import com.agentforandroid.repository.ConfigRepository
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import java.util.UUID
+
+class ChatViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val app = application as AgentApp
+    private val chatRepo = ChatRepository(app.database)
+    private val configRepo = ConfigRepository(app.database)
+    private val skillRepo = com.agentforandroid.repository.SkillRepository(application)
+
+    private val _streamingText = MutableStateFlow("")
+    val streamingText: StateFlow<String> = _streamingText.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
+    private var currentSession: ChatSession? = null
+
+    private val _messages = MutableStateFlow<List<Message>>(emptyList())
+    val messages: StateFlow<List<Message>> = _messages.asStateFlow()
+
+    companion object {
+        const val BASE_SYSTEM_PROMPT =
+            "You are Agent For Android, an AI assistant running on a mobile phone. " +
+            "You provide helpful, accurate responses. When Skills are active, " +
+            "use their guidance to enhance your answers. " +
+            "Use markdown formatting for code blocks, tables, and lists."
+    }
+
+    suspend fun initOrCreateSession(modelConfigId: String, enabledSkills: List<String>) {
+        currentSession = chatRepo.createSession(modelConfigId, enabledSkills)
+    }
+
+    fun loadMessages(sessionId: String) {
+        viewModelScope.launch {
+            chatRepo.getMessages(sessionId).collect { msgs ->
+                _messages.value = msgs
+            }
+        }
+    }
+
+    fun sendMessage(text: String) {
+        viewModelScope.launch {
+            val session = currentSession ?: return@launch
+            _error.value = null
+            _isLoading.value = true
+            _streamingText.value = ""
+
+            // Save user message
+            val userMsg = Message(
+                id = UUID.randomUUID().toString(),
+                sessionId = session.id,
+                role = "user",
+                content = text
+            )
+            chatRepo.saveMessage(userMsg)
+            _messages.value = _messages.value + userMsg
+
+            // Auto-title: use first user message
+            if (_messages.value.size == 1) {
+                val title = if (text.length > 30) text.take(30) + "..." else text
+                chatRepo.updateSessionTitle(session.id, title)
+            }
+
+            // Get model config
+            val config = configRepo.getDefault()
+            if (config == null) {
+                _error.value = "请先在设置中配置一个模型"
+                _isLoading.value = false
+                return@launch
+            }
+
+            // Build system prompt with skills
+            val enabledSkills = skillRepo.getEnabledSkills()
+            val systemPrompt = chatRepo.buildSystemPrompt(BASE_SYSTEM_PROMPT, enabledSkills)
+
+            // Build messages for LLM
+            val llmMessages = mutableListOf<Map<String, String>>()
+            llmMessages.add(mapOf("role" to "system", "content" to systemPrompt))
+
+            val historyMessages = _messages.value.map {
+                mapOf("role" to it.role, "content" to it.content)
+            }
+            llmMessages.addAll(historyMessages)
+
+            // Stream response
+            val fullResponse = StringBuilder()
+            chatRepo.streamChat(config, llmMessages).collect { result ->
+                when (result) {
+                    is LLMClient.LLMResult.Chunk -> {
+                        fullResponse.append(result.text)
+                        _streamingText.value = fullResponse.toString()
+                    }
+                    is LLMClient.LLMResult.Error -> {
+                        _error.value = result.message
+                    }
+                    is LLMClient.LLMResult.Done -> {
+                        val assistantMsg = Message(
+                            id = UUID.randomUUID().toString(),
+                            sessionId = session.id,
+                            role = "assistant",
+                            content = fullResponse.toString()
+                        )
+                        chatRepo.saveMessage(assistantMsg)
+                        _messages.value = _messages.value + assistantMsg
+                    }
+                }
+            }
+            _streamingText.value = ""
+            _isLoading.value = false
+        }
+    }
+
+    fun clearError() {
+        _error.value = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        chatRepo.shutdown()
+    }
+}
