@@ -230,7 +230,6 @@ private fun PersonalitySkillCard(
                     Text(skill.name, style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.secondary)
                 }
-                Switch(checked = skill.enabled, onCheckedChange = { viewModel.toggleSkill(skill.name, it) })
             }
             TextButton(onClick = onRemovePersonality, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Default.Star, contentDescription = null, modifier = Modifier.size(14.dp),

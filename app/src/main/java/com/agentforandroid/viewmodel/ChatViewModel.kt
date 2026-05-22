@@ -121,7 +121,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 // Build system prompt with personality + skills
+                // Exclude personality skills from regular skill injection
                 val enabledSkills = skillRepo.getEnabledSkills()
+                    .filter { !it.isPersonality }
                 var systemPrompt = "$BASE_SYSTEM_PROMPT\n\nCurrent model: ${config.name} (${config.modelId})"
 
                 // Personality takes precedence - injected first
