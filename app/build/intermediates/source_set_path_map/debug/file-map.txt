@@ -1,0 +1,60 @@
+com.agentforandroid.app-lifecycle-viewmodel-compose-2.7.0-0 C:\Users\HanYouyang\.gradle\caches\transforms-3\0785889662a9b40152597e11cf5ecde1\transformed\lifecycle-viewmodel-compose-2.7.0\res
+com.agentforandroid.app-lifecycle-runtime-compose-2.7.0-1 C:\Users\HanYouyang\.gradle\caches\transforms-3\095851942a8a25c57327296a48c698c2\transformed\lifecycle-runtime-compose-2.7.0\res
+com.agentforandroid.app-navigation-runtime-ktx-2.7.7-2 C:\Users\HanYouyang\.gradle\caches\transforms-3\0a59b98d4ba51950a1bfeba5ff5b2596\transformed\navigation-runtime-ktx-2.7.7\res
+com.agentforandroid.app-navigation-common-ktx-2.7.7-3 C:\Users\HanYouyang\.gradle\caches\transforms-3\14c9854e7853f1c7c23df7875f26cec7\transformed\navigation-common-ktx-2.7.7\res
+com.agentforandroid.app-activity-compose-1.8.2-4 C:\Users\HanYouyang\.gradle\caches\transforms-3\152e48f0d4227777c1252e8ac0aaca8e\transformed\activity-compose-1.8.2\res
+com.agentforandroid.app-sqlite-framework-2.4.0-5 C:\Users\HanYouyang\.gradle\caches\transforms-3\1664270069a0f287d69d84706f6f6132\transformed\sqlite-framework-2.4.0\res
+com.agentforandroid.app-animation-core-release-6 C:\Users\HanYouyang\.gradle\caches\transforms-3\19ed8377a7eae082c3f5699a658ec4f2\transformed\animation-core-release\res
+com.agentforandroid.app-core-1.12.0-7 C:\Users\HanYouyang\.gradle\caches\transforms-3\2617922686cee08b35d8bfb4d0db8ea2\transformed\core-1.12.0\res
+com.agentforandroid.app-runtime-saveable-release-8 C:\Users\HanYouyang\.gradle\caches\transforms-3\26c7c429ab089ccdc78a3ac96b52fa78\transformed\runtime-saveable-release\res
+com.agentforandroid.app-material-release-9 C:\Users\HanYouyang\.gradle\caches\transforms-3\2a13322e261129d0debc5eef24db812f\transformed\material-release\res
+com.agentforandroid.app-lifecycle-process-2.7.0-10 C:\Users\HanYouyang\.gradle\caches\transforms-3\2a412d815aba69331790bbb2984f4d81\transformed\lifecycle-process-2.7.0\res
+com.agentforandroid.app-ui-graphics-release-11 C:\Users\HanYouyang\.gradle\caches\transforms-3\2e0f657867fabb2b036f4450cbae820d\transformed\ui-graphics-release\res
+com.agentforandroid.app-core-runtime-2.2.0-12 C:\Users\HanYouyang\.gradle\caches\transforms-3\30276b89deae3ca7b29e7b4445b59137\transformed\core-runtime-2.2.0\res
+com.agentforandroid.app-ui-util-release-13 C:\Users\HanYouyang\.gradle\caches\transforms-3\359a08ea0e678dd5d864592c58f15d15\transformed\ui-util-release\res
+com.agentforandroid.app-activity-ktx-1.8.2-14 C:\Users\HanYouyang\.gradle\caches\transforms-3\3fabf282925dba976593a60412920868\transformed\activity-ktx-1.8.2\res
+com.agentforandroid.app-activity-1.8.2-15 C:\Users\HanYouyang\.gradle\caches\transforms-3\45b527d3358f3d917c4918e529237457\transformed\activity-1.8.2\res
+com.agentforandroid.app-profileinstaller-1.3.0-16 C:\Users\HanYouyang\.gradle\caches\transforms-3\4c6280d2a6831313e5bc9a54010d24fb\transformed\profileinstaller-1.3.0\res
+com.agentforandroid.app-datastore-1.0.0-17 C:\Users\HanYouyang\.gradle\caches\transforms-3\4d22f415abcd81abc94c3086922f9fe2\transformed\datastore-1.0.0\res
+com.agentforandroid.app-room-ktx-2.6.1-18 C:\Users\HanYouyang\.gradle\caches\transforms-3\4faca55aec8d622c1029745dabc3421b\transformed\room-ktx-2.6.1\res
+com.agentforandroid.app-customview-poolingcontainer-1.0.0-19 C:\Users\HanYouyang\.gradle\caches\transforms-3\5154385af4839d1bc3352bb68cde7c86\transformed\customview-poolingcontainer-1.0.0\res
+com.agentforandroid.app-navigation-compose-2.7.7-20 C:\Users\HanYouyang\.gradle\caches\transforms-3\5277766b86d3647aa5b4464b2efee0fc\transformed\navigation-compose-2.7.7\res
+com.agentforandroid.app-ui-tooling-release-21 C:\Users\HanYouyang\.gradle\caches\transforms-3\52af7e87945c457992ca5a2176d49baa\transformed\ui-tooling-release\res
+com.agentforandroid.app-lifecycle-runtime-ktx-2.7.0-22 C:\Users\HanYouyang\.gradle\caches\transforms-3\5a80ac062f99375883bc71a1d49c176b\transformed\lifecycle-runtime-ktx-2.7.0\res
+com.agentforandroid.app-runtime-release-23 C:\Users\HanYouyang\.gradle\caches\transforms-3\6658485e7aacd04bc58c6318d70e692a\transformed\runtime-release\res
+com.agentforandroid.app-startup-runtime-1.1.1-24 C:\Users\HanYouyang\.gradle\caches\transforms-3\6729d063d8837c08c9ef1d7d5f3061ab\transformed\startup-runtime-1.1.1\res
+com.agentforandroid.app-material-icons-core-release-25 C:\Users\HanYouyang\.gradle\caches\transforms-3\76328d11f654722ec0c97ab9dff680d0\transformed\material-icons-core-release\res
+com.agentforandroid.app-ui-release-26 C:\Users\HanYouyang\.gradle\caches\transforms-3\789862ae08655787f32fc9f4cc8ad19b\transformed\ui-release\res
+com.agentforandroid.app-lifecycle-runtime-2.7.0-27 C:\Users\HanYouyang\.gradle\caches\transforms-3\78e9b8078fdccd3ff65b2ff71f145f37\transformed\lifecycle-runtime-2.7.0\res
+com.agentforandroid.app-datastore-preferences-1.0.0-28 C:\Users\HanYouyang\.gradle\caches\transforms-3\80f0e65bdafc962835c23ad0ed42ef3a\transformed\datastore-preferences-1.0.0\res
+com.agentforandroid.app-lifecycle-livedata-core-2.7.0-29 C:\Users\HanYouyang\.gradle\caches\transforms-3\821f419c4c878595a17b4d6088e3392b\transformed\lifecycle-livedata-core-2.7.0\res
+com.agentforandroid.app-foundation-layout-release-30 C:\Users\HanYouyang\.gradle\caches\transforms-3\8744ed213b8308431b77eafba47ba357\transformed\foundation-layout-release\res
+com.agentforandroid.app-savedstate-1.2.1-31 C:\Users\HanYouyang\.gradle\caches\transforms-3\8f4ae070182d49f157accfe1b711a4fe\transformed\savedstate-1.2.1\res
+com.agentforandroid.app-sqlite-2.4.0-32 C:\Users\HanYouyang\.gradle\caches\transforms-3\93582caccd53abb56d30bb869163c3ee\transformed\sqlite-2.4.0\res
+com.agentforandroid.app-ui-tooling-data-release-33 C:\Users\HanYouyang\.gradle\caches\transforms-3\94855d47c67b2a0ceb3a9a6c1067e368\transformed\ui-tooling-data-release\res
+com.agentforandroid.app-navigation-runtime-2.7.7-34 C:\Users\HanYouyang\.gradle\caches\transforms-3\9804ee7a3e6639054f488c0140c6409b\transformed\navigation-runtime-2.7.7\res
+com.agentforandroid.app-savedstate-ktx-1.2.1-35 C:\Users\HanYouyang\.gradle\caches\transforms-3\9c85734a353f9d92e46c6b89a79befaf\transformed\savedstate-ktx-1.2.1\res
+com.agentforandroid.app-room-runtime-2.6.1-36 C:\Users\HanYouyang\.gradle\caches\transforms-3\9e3b8f9de8ad84d4d58ae5d24346c411\transformed\room-runtime-2.6.1\res
+com.agentforandroid.app-material3-release-37 C:\Users\HanYouyang\.gradle\caches\transforms-3\a46eec634895e3a3072465344beef709\transformed\material3-release\res
+com.agentforandroid.app-animation-release-38 C:\Users\HanYouyang\.gradle\caches\transforms-3\a62b26eea031e4af275a273d8232b2ba\transformed\animation-release\res
+com.agentforandroid.app-ui-unit-release-39 C:\Users\HanYouyang\.gradle\caches\transforms-3\ac700f85e107f6daecf44fc89451a42f\transformed\ui-unit-release\res
+com.agentforandroid.app-core-4.6.2-40 C:\Users\HanYouyang\.gradle\caches\transforms-3\aca0b91c682e01daeb2f0a2271f4d846\transformed\core-4.6.2\res
+com.agentforandroid.app-ui-tooling-preview-release-41 C:\Users\HanYouyang\.gradle\caches\transforms-3\b1e7e27614c9e46cc4c1785f70570f69\transformed\ui-tooling-preview-release\res
+com.agentforandroid.app-ui-text-release-42 C:\Users\HanYouyang\.gradle\caches\transforms-3\bd3e0ef69c2e9c0bc5e654595fc648a0\transformed\ui-text-release\res
+com.agentforandroid.app-lifecycle-viewmodel-ktx-2.7.0-43 C:\Users\HanYouyang\.gradle\caches\transforms-3\c59fb28979d1e2373e86c08c4e260669\transformed\lifecycle-viewmodel-ktx-2.7.0\res
+com.agentforandroid.app-annotation-experimental-1.4.0-44 C:\Users\HanYouyang\.gradle\caches\transforms-3\cb2e913cf64f7ac078b239574af46321\transformed\annotation-experimental-1.4.0\res
+com.agentforandroid.app-core-ktx-1.12.0-45 C:\Users\HanYouyang\.gradle\caches\transforms-3\d5b1019f48a5559f33971fe7cf90b9b0\transformed\core-ktx-1.12.0\res
+com.agentforandroid.app-ui-geometry-release-46 C:\Users\HanYouyang\.gradle\caches\transforms-3\dadf83d119c7bb2b903df28f95b4f181\transformed\ui-geometry-release\res
+com.agentforandroid.app-material-ripple-release-47 C:\Users\HanYouyang\.gradle\caches\transforms-3\de1b8aa9d8de3babff5049ace260bc2e\transformed\material-ripple-release\res
+com.agentforandroid.app-foundation-release-48 C:\Users\HanYouyang\.gradle\caches\transforms-3\de299283f19aa824193d473e1f453955\transformed\foundation-release\res
+com.agentforandroid.app-navigation-common-2.7.7-49 C:\Users\HanYouyang\.gradle\caches\transforms-3\ecdfcdc2ce16cccfa02822d4d0aaf911\transformed\navigation-common-2.7.7\res
+com.agentforandroid.app-emoji2-1.3.0-50 C:\Users\HanYouyang\.gradle\caches\transforms-3\ee403292dd170414d87ca8c4224f20a1\transformed\emoji2-1.3.0\res
+com.agentforandroid.app-lifecycle-viewmodel-2.7.0-51 C:\Users\HanYouyang\.gradle\caches\transforms-3\f2c21d48e1e3142f2d3a185d09be6573\transformed\lifecycle-viewmodel-2.7.0\res
+com.agentforandroid.app-lifecycle-viewmodel-savedstate-2.7.0-52 C:\Users\HanYouyang\.gradle\caches\transforms-3\ffa7289a6552edcb24ebd2a8eeebc54c\transformed\lifecycle-viewmodel-savedstate-2.7.0\res
+com.agentforandroid.app-pngs-53 D:\workspace\Agent For Android\app\build\generated\res\pngs\debug
+com.agentforandroid.app-resValues-54 D:\workspace\Agent For Android\app\build\generated\res\resValues\debug
+com.agentforandroid.app-packageDebugResources-55 D:\workspace\Agent For Android\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.agentforandroid.app-packageDebugResources-56 D:\workspace\Agent For Android\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.agentforandroid.app-merged_res-57 D:\workspace\Agent For Android\app\build\intermediates\merged_res\debug
+com.agentforandroid.app-debug-58 D:\workspace\Agent For Android\app\src\debug\res
+com.agentforandroid.app-main-59 D:\workspace\Agent For Android\app\src\main\res

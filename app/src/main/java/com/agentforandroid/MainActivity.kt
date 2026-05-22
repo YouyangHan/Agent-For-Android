@@ -7,11 +7,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Chat
-import androidx.compose.material.icons.outlined.Extension
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -51,8 +51,8 @@ fun MainApp() {
     val navController = rememberNavController()
 
     val items = listOf(
-        BottomNavItem("chat", "对话", Icons.Filled.Chat, Icons.Outlined.Chat),
-        BottomNavItem("skills", "Skills", Icons.Filled.Extension, Icons.Outlined.Extension),
+        BottomNavItem("chat", "对话", Icons.Filled.Home, Icons.Outlined.Home),
+        BottomNavItem("skills", "Skills", Icons.Filled.Star, Icons.Outlined.Star),
         BottomNavItem("settings", "设置", Icons.Filled.Settings, Icons.Outlined.Settings),
     )
 

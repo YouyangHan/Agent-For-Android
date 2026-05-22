@@ -1,10 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Read(//c/Users/HanYouyang/.android//**)",
-      "Read(//c/Users/HanYouyang/AppData/Local/**)",
-      "Read(//c/Users/HanYouyang/AppData/Local/Android/**)",
-      "Read(//d//**)"
-    ]
+      "Bash(*:*)"
+    ],
+    "defaultMode": "acceptEdits"
   }
 }

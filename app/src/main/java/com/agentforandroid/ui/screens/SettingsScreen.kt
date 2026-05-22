@@ -8,8 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -160,9 +158,8 @@ private fun ConfigDialog(
                     visualTransformation = if (showKey) VisualTransformation.None
                         else PasswordVisualTransformation(),
                     trailingIcon = {
-                        IconButton(onClick = { showKey = !showKey }) {
-                            Icon(if (showKey) Icons.Default.VisibilityOff
-                                else Icons.Default.Visibility, contentDescription = null)
+                        TextButton(onClick = { showKey = !showKey }) {
+                            Text(if (showKey) "隐藏" else "显示")
                         }
                     }
                 )
