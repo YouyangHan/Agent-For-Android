@@ -124,21 +124,6 @@ fun ChatScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            // Active skills indicator
-            val activeSkills = skills.filter { it.enabled }
-            if (activeSkills.isNotEmpty()) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        "Skills: ${activeSkills.joinToString(", ") { it.name }}",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
-
             LazyColumn(
                 state = listState,
                 modifier = Modifier

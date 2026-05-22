@@ -7,20 +7,23 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class SkillRepository(private val context: Context) {
+class SkillRepository private constructor(private val context: Context) {
 
     private val _skills = MutableStateFlow<List<Skill>>(emptyList())
     val skills: StateFlow<List<Skill>> = _skills.asStateFlow()
 
     private val prefs by lazy {
-        context.getSharedPreferences("skill_prefs", Context.MODE_PRIVATE)
+        context.applicationContext.getSharedPreferences("skill_prefs", Context.MODE_PRIVATE)
     }
 
+    private var loaded = false
+
     fun loadSkills() {
-        val loaded = SkillLoader.loadAll(context)
+        if (loaded) return
+        loaded = true
+        val loaded = SkillLoader.loadAll(context.applicationContext)
         val enabledSet = prefs.getStringSet("enabled_skills", emptySet()) ?: emptySet()
 
-        // First launch: enable all. After that, respect stored pref.
         val isFirstLaunch = prefs.getBoolean("first_launch", true)
         val skillsWithState = loaded.map { skill ->
             val enabled = if (isFirstLaunch) true else enabledSet.contains(skill.name)
@@ -42,4 +45,18 @@ class SkillRepository(private val context: Context) {
     }
 
     fun getEnabledSkills(): List<Skill> = _skills.value.filter { it.enabled }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: SkillRepository? = null
+
+        fun getInstance(context: Context): SkillRepository {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SkillRepository(context.applicationContext).also {
+                    it.loadSkills()
+                    INSTANCE = it
+                }
+            }
+        }
+    }
 }

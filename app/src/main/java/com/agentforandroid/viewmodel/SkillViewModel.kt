@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class SkillViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = SkillRepository(application)
+    private val repository = SkillRepository.getInstance(application)
 
     val skills: StateFlow<List<Skill>> = repository.skills
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

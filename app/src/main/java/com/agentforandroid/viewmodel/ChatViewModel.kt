@@ -18,7 +18,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application as AgentApp
     private val chatRepo = ChatRepository(app.database)
     private val configRepo = ConfigRepository(app.database)
-    private val skillRepo = com.agentforandroid.repository.SkillRepository(application)
+    private val skillRepo = com.agentforandroid.repository.SkillRepository.getInstance(application)
 
     private val _streamingText = MutableStateFlow("")
     val streamingText: StateFlow<String> = _streamingText.asStateFlow()

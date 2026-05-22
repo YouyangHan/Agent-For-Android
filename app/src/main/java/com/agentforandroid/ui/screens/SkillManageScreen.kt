@@ -67,12 +67,12 @@ fun SkillManageScreen(viewModel: SkillViewModel = viewModel()) {
                                     color = MaterialTheme.colorScheme.secondary
                                 )
                             }
-                            Text(skill.description,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.secondary)
-                            Text(skill.sourcePath,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.secondary)
+                            if (skill.description.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(skill.description,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                            }
                         }
                         Switch(
                             checked = skill.enabled,
