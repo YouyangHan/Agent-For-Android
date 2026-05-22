@@ -36,7 +36,7 @@ class LLMClient {
 
     fun streamChat(request: LLMRequest): Flow<LLMResult> = callbackFlow {
         val bodyJson = JSONObject().apply {
-            put("model", request.model)
+            if (request.model.isNotBlank()) put("model", request.model)
             put("messages", JSONArray(request.messages.map { msg ->
                 JSONObject().apply {
                     put("role", msg["role"])
@@ -122,7 +122,7 @@ class LLMClient {
         }
 
         val bodyJson = JSONObject().apply {
-            put("model", request.model)
+            if (request.model.isNotBlank()) put("model", request.model)
             put("max_tokens", 4096)
             put("stream", true)
             if (systemPrompt.isNotEmpty()) {

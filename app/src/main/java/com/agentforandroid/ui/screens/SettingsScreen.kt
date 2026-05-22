@@ -182,9 +182,10 @@ private fun ConfigDialog(
     var name by remember { mutableStateOf(initial?.name ?: "") }
     var modelId by remember { mutableStateOf(initial?.modelId ?: "") }
     var apiKey by remember { mutableStateOf(initial?.apiKey ?: "") }
-    var baseUrl by remember { mutableStateOf(initial?.baseUrl ?: "https://api.anthropic.com") }
-    var apiType by remember { mutableStateOf(initial?.apiType ?: "anthropic") } // default to Anthropic
+    var baseUrl by remember { mutableStateOf(initial?.baseUrl ?: "") }
+    var apiType by remember { mutableStateOf(initial?.apiType ?: "") }
     var showKey by remember { mutableStateOf(false) }
+    var apiTypeExpanded by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -194,8 +195,7 @@ private fun ConfigDialog(
                 OutlinedTextField(value = name, onValueChange = { name = it },
                     label = { Text("模型名称") }, singleLine = true)
                 OutlinedTextField(value = modelId, onValueChange = { modelId = it },
-                    label = { Text("模型 ID") }, singleLine = true,
-                    placeholder = { Text("deepseek-chat / claude-opus-4-7") })
+                    label = { Text("模型 ID (可选)") }, singleLine = true)
                 OutlinedTextField(
                     value = apiKey, onValueChange = { apiKey = it },
                     label = { Text("API Key") }, maxLines = 3,
@@ -209,11 +209,44 @@ private fun ConfigDialog(
                 )
                 OutlinedTextField(value = baseUrl, onValueChange = { baseUrl = it },
                     label = { Text("Base URL") }, singleLine = true)
+
+                // API type selector
+                Box {
+                    OutlinedTextField(
+                        value = when (apiType) {
+                            "anthropic" -> "Anthropic"
+                            "openai" -> "OpenAI"
+                            else -> "选择 API 类型..."
+                        },
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("API 类型") },
+                        trailingIcon = {
+                            IconButton(onClick = { apiTypeExpanded = true }) {
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    DropdownMenu(
+                        expanded = apiTypeExpanded,
+                        onDismissRequest = { apiTypeExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("OpenAI (Chat Completions)") },
+                            onClick = { apiType = "openai"; apiTypeExpanded = false }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Anthropic (Messages)") },
+                            onClick = { apiType = "anthropic"; apiTypeExpanded = false }
+                        )
+                    }
+                }
             }
         },
         confirmButton = {
             TextButton(onClick = {
-                if (name.isNotBlank() && modelId.isNotBlank() && apiKey.isNotBlank() && baseUrl.isNotBlank()) {
+                if (name.isNotBlank() && apiKey.isNotBlank() && baseUrl.isNotBlank() && apiType.isNotBlank()) {
                     onConfirm(name, modelId, apiKey, baseUrl, apiType)
                 }
             }) { Text("保存") }
