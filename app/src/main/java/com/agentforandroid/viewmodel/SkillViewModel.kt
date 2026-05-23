@@ -32,6 +32,10 @@ class SkillViewModel(application: Application) : AndroidViewModel(application) {
         repository.togglePersonality(skillName, isPersonality, personalityName)
     }
 
+    fun deleteSkill(skill: Skill) {
+        repository.deleteSkill(skill)
+    }
+
     fun reloadSkills() {
         repository.reloadSkills()
     }

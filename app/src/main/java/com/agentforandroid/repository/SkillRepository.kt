@@ -83,6 +83,17 @@ class SkillRepository private constructor(private val context: Context) {
     fun getBuiltinSkills(): List<Skill> = _skills.value.filter { it.isBuiltin }
     fun getUserSkills(): List<Skill> = _skills.value.filter { !it.isBuiltin }
 
+    fun deleteSkill(skill: Skill) {
+        if (skill.isBuiltin) return
+        // Delete folder from disk
+        try {
+            val dir = java.io.File(skill.sourcePath).parentFile
+            if (dir != null && dir.exists()) dir.deleteRecursively()
+        } catch (_: Exception) {}
+        // Remove from list
+        _skills.value = _skills.value.filter { it.name != skill.name }
+    }
+
     fun getPersonalitySkills(): List<Skill> = _skills.value.filter { it.isPersonality && it.enabled }
 
     fun togglePersonality(skillName: String, isPersonality: Boolean, personalityName: String) {

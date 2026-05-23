@@ -12,8 +12,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -248,6 +250,7 @@ private fun PersonalitySkillCard(
 private fun UserSkillCard(
     skill: Skill, viewModel: SkillViewModel, onClick: () -> Unit, onPromote: () -> Unit
 ) {
+    var showDeleteConfirm by remember { mutableStateOf(false) }
     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).clickable { onClick() }) {
         Column {
             Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -261,14 +264,40 @@ private fun UserSkillCard(
                 }
                 Switch(checked = skill.enabled, onCheckedChange = { viewModel.toggleSkill(skill.name, it) })
             }
-            if (skill.enabled) {
-                TextButton(onClick = onPromote, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.Default.Star, contentDescription = null, modifier = Modifier.size(14.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                if (skill.enabled) {
+                    TextButton(onClick = onPromote) {
+                        Icon(Icons.Default.Star, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("设为性格", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+                TextButton(onClick = { showDeleteConfirm = true }) {
+                    Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.error)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("设为性格", style = MaterialTheme.typography.labelSmall)
+                    Text("删除", style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error)
                 }
             }
         }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("删除 Skill") },
+            text = { Text("确定要删除 \"${skill.name}\" 吗？\n将同时删除本地文件。") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteSkill(skill)
+                    showDeleteConfirm = false
+                }) { Text("删除", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) { Text("取消") }
+            }
+        )
     }
 }
 
