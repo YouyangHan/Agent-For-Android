@@ -44,11 +44,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _personalitySkills = MutableStateFlow<List<Skill>>(emptyList())
     val personalitySkills: StateFlow<List<Skill>> = _personalitySkills.asStateFlow()
 
-    // Persist selected config across restarts
-    fun setSelectedConfigId(id: String) {
-        selectedConfigId = id
-        prefs.edit().putString("last_config_id", id).apply()
-    }
+    fun setSelectedConfigId(id: String) { selectedConfigId = id }
     fun getSelectedConfigId(): String? {
         if (selectedConfigId == null) {
             selectedConfigId = prefs.getString("last_config_id", null)
@@ -56,12 +52,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         return selectedConfigId
     }
 
-    // Persist selected personality across restarts
-    fun setPersonality(skill: Skill?) {
-        selectedPersonality = skill
-        prefs.edit().putString("last_personality", skill?.name ?: "").apply()
-    }
-    fun getPersonality(): Skill? { return selectedPersonality }
+    // Personality selection (in-memory only, persisted on clear)
+    fun setPersonality(skill: Skill?) { selectedPersonality = skill }
+    fun getPersonality(): Skill? = selectedPersonality
 
     fun restorePersonality() {
         val savedName = prefs.getString("last_personality", "") ?: ""
@@ -228,6 +221,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
+        prefs.edit().putString("last_personality", selectedPersonality?.name ?: "").apply()
+        prefs.edit().putString("last_config_id", selectedConfigId ?: "").apply()
         chatRepo.shutdown()
     }
 }
