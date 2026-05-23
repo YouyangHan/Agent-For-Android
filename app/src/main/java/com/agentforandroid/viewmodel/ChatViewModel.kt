@@ -157,12 +157,13 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                // System prompt: activePersonaContent is set atomically in setPersonality()
+                // System prompt: activePersonaContent set atomically in setPersonality()
+                val personaName = _selectedPersonality.value?.personalityName ?: "无"
                 var systemPrompt: String
                 if (activePersonaContent.isNotEmpty()) {
-                    systemPrompt = "$activePersonaContent\n\nCurrent model: ${config.name}"
+                    systemPrompt = "$activePersonaContent\n\n[系统: 当前性格=$personaName, 模型=${config.name}]"
                 } else {
-                    systemPrompt = "$BASE_SYSTEM_PROMPT\nCurrent model: ${config.name}"
+                    systemPrompt = "$BASE_SYSTEM_PROMPT\n[系统: 无性格, 模型=${config.name}]"
                 }
 
                 // Only NON-personality skills + tools
