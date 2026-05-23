@@ -1,7 +1,6 @@
 package com.agentforandroid.ui.theme
 
 import android.content.Context
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -74,7 +73,7 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun AgentForAndroidTheme(
-    themeMode: ThemeMode = ThemeMode.SYSTEM,
+    themeMode: ThemeMode = ThemeMode.LIGHT,
     content: @Composable () -> Unit
 ) {
     val darkTheme = themeMode == ThemeMode.DARK
