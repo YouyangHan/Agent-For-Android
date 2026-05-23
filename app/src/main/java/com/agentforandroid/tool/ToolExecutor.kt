@@ -96,24 +96,35 @@ class ToolExecutor(private val context: Context) {
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
             if (timeInMillis <= System.currentTimeMillis()) {
-                add(Calendar.DAY_OF_YEAR, 1) // Tomorrow if time passed
+                add(Calendar.DAY_OF_YEAR, 1)
             }
         }
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        // Check exact alarm permission on Android 12+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                return "❌ 需要精确闹钟权限。请在系统设置中授权"
+            }
+        }
+
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("label", label)
         }
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         val pendingIntent = PendingIntent.getBroadcast(
-            context, label.hashCode(), intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            context, label.hashCode(), intent, flags
         )
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
-        )
-
-        return "✅ 闹钟已设置: ${time} $label"
+        try {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
+            )
+            return "✅ 闹钟已设置: ${time} $label (${if (calendar.timeInMillis <= System.currentTimeMillis()) "明天" else "今天"})"
+        } catch (e: SecurityException) {
+            return "❌ 闹钟权限不足: ${e.localizedMessage}"
+        }
     }
 
     private fun addEvent(params: JSONObject): String {
@@ -187,30 +198,48 @@ class ToolExecutor(private val context: Context) {
 
         val pm = context.packageManager
         val apps = pm.getInstalledApplications(0)
-        var targetPkg: String? = null
+        val matches = mutableListOf<Pair<String, String>>() // (packageName, label)
 
         // Search by app name (case-insensitive partial match)
         for (app in apps) {
             val label = pm.getApplicationLabel(app).toString()
-            if (label.contains(appName, ignoreCase = true)) {
-                targetPkg = app.packageName
-                break
+            if (label.contains(appName, ignoreCase = true) ||
+                app.packageName.contains(appName, ignoreCase = true)) {
+                matches.add(Pair(app.packageName, label))
             }
         }
 
-        if (targetPkg == null) {
-            // Try package name directly
-            targetPkg = appName
+        if (matches.isEmpty()) {
+            return "❌ 未找到应用: $appName\n请确认应用名称正确"
         }
 
+        // Try each match until one works
+        for ((pkg, label) in matches) {
+            try {
+                val intent = pm.getLaunchIntentForPackage(pkg)
+                if (intent != null) {
+                    intent.addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    )
+                    context.startActivity(intent)
+                    return "✅ 已启动: $label"
+                }
+            } catch (_: Exception) {}
+        }
+
+        // Fallback: try the name as package name directly
         return try {
-            val intent = pm.getLaunchIntentForPackage(targetPkg!!)
+            val intent = pm.getLaunchIntentForPackage(appName)
             if (intent != null) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                )
                 context.startActivity(intent)
                 "✅ 已启动: $appName"
             } else {
-                "❌ 无法启动: $appName (应用可能没有启动界面)"
+                "❌ 无法启动: $appName\n找到 ${matches.size} 个匹配但均无法启动"
             }
         } catch (e: Exception) {
             "❌ 启动失败: ${e.localizedMessage}"
