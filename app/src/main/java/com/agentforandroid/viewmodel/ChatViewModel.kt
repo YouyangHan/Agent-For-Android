@@ -144,20 +144,23 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                // Build system prompt with personality + skills
-                // Exclude personality skills from regular skill injection
-                val enabledSkills = skillRepo.getEnabledSkills()
-                    .filter { !it.isPersonality }
-                var systemPrompt = "$BASE_SYSTEM_PROMPT\n\nCurrent model: ${config.name} (${config.modelId})"
+                // Active personality name for prompt
+                val personaName = selectedPersonality?.personalityName ?: "无"
+                var systemPrompt = "$BASE_SYSTEM_PROMPT\nCurrent model: ${config.name}\nActive personality: $personaName"
 
-                // Personality takes precedence - injected first
+                // Personality injected only when explicitly selected (not Default)
                 if (selectedPersonality != null) {
                     val p = selectedPersonality!!
                     val pBody = if (p.content.length > 3000) p.content.take(3000) + "\n...(truncated)" else p.content
                     systemPrompt = pBody + "\n\n" + systemPrompt
+                    systemPrompt += "\n\n注意: 你正在使用 '$personaName' 性格。请完全按照此性格设定回复。"
+                } else {
+                    systemPrompt += "\n\n注意: 你没有使用任何性格设定。请以默认AI助手身份回复。"
                 }
 
-                // Regular skills + tool instructions appended after
+                // Regular skills (exclude personality skills) + tools
+                val enabledSkills = skillRepo.getEnabledSkills()
+                    .filter { !it.isPersonality }
                 systemPrompt = chatRepo.buildSystemPrompt(systemPrompt, enabledSkills)
                 systemPrompt += "\n\n" + com.agentforandroid.tool.ToolExecutor.TOOL_DESCRIPTIONS
 
