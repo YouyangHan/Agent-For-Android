@@ -74,6 +74,45 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
             } else {
                 // General settings
                 LazyColumn {
+                    // Language & Theme
+                    item {
+                        Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text("偏好设置", style = MaterialTheme.typography.titleSmall)
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // Language toggle
+                                var isChinese by remember { mutableStateOf(true) }
+                                Row(verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()) {
+                                    Text("语言 / Language", modifier = Modifier.weight(1f))
+                                    Text(if (isChinese) "中文" else "EN",
+                                        style = MaterialTheme.typography.labelSmall)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Switch(checked = isChinese,
+                                        onCheckedChange = { isChinese = it })
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+                                HorizontalDivider()
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                // Theme toggle
+                                var themeMode by remember { mutableStateOf(0) } // 0=system, 1=light, 2=dark
+                                val themeLabel = when(themeMode) { 0->"跟随系统"; 1->"浅色"; 2->"深色"; else->"" }
+                                Row(verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()) {
+                                    Text("主题", modifier = Modifier.weight(1f))
+                                    Text(themeLabel, style = MaterialTheme.typography.labelSmall)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    TextButton(onClick = {
+                                        themeMode = (themeMode + 1) % 3
+                                    }) { Text(themeLabel) }
+                                }
+                            }
+                        }
+                    }
+
                     // Donate section
                     item {
                         Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {

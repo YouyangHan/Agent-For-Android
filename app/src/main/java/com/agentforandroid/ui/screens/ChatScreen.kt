@@ -84,11 +84,40 @@ fun ChatScreen(
     }
 
     Scaffold(
-        modifier = Modifier.windowInsetsPadding(WindowInsets.ime),
         topBar = {
             TopAppBar(
                 title = { Text("Agent Yang") }
             )
+        },
+        floatingActionButton = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Scroll to bottom
+                FloatingActionButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            if (messages.isNotEmpty()) listState.scrollToItem(messages.size)
+                        }
+                    },
+                    modifier = Modifier.size(40.dp),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ) {
+                    Text("↓", style = MaterialTheme.typography.titleSmall)
+                }
+                // Clear context
+                FloatingActionButton(
+                    onClick = {
+                        chatVM.clearSession()
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("上下文已清空")
+                        }
+                    },
+                    modifier = Modifier.size(40.dp),
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                ) {
+                    Text("✕", style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.error)
+                }
+            }
         },
         bottomBar = {
             Column {

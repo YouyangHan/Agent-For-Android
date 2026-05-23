@@ -82,6 +82,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearSwitchMessage() { _personaSwitchMessage.value = null }
 
+    fun clearSession() {
+        sendJob?.cancel()
+        _messages.value = emptyList()
+        _streamingText.value = ""
+        _error.value = null
+        _isLoading.value = false
+        currentSession = null
+    }
+
     fun setSelectedConfigId(id: String) { selectedConfigId = id }
     fun getSelectedConfigId(): String? {
         if (selectedConfigId == null) {
