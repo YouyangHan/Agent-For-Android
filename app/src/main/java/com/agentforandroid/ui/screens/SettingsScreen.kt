@@ -108,29 +108,6 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
                                 Text("偏好设置", style = MaterialTheme.typography.titleSmall)
                                 Spacer(modifier = Modifier.height(12.dp))
 
-                                // Language toggle
-                                val context = LocalContext.current
-                                val savedLang = com.agentforandroid.ui.theme.AppPreferences.getLanguage(context)
-                                var isChinese by remember { mutableStateOf(savedLang == "zh") }
-                                Row(verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()) {
-                                    Text("语言 / Language", modifier = Modifier.weight(1f))
-                                    Text(if (isChinese) "中文" else "EN",
-                                        style = MaterialTheme.typography.labelSmall)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Switch(checked = isChinese, onCheckedChange = { ch ->
-                                        isChinese = ch
-                                        val lang = if (ch) "zh" else "en"
-                                        com.agentforandroid.ui.theme.AppPreferences.setLanguage(context, lang)
-                                        com.agentforandroid.AgentApp.setLocale(context, lang)
-                                        (context as? android.app.Activity)?.recreate()
-                                    })
-                                }
-
-                                Spacer(modifier = Modifier.height(8.dp))
-                                HorizontalDivider()
-                                Spacer(modifier = Modifier.height(8.dp))
-
                                 // Theme toggle (Light/Dark only)
                                 val savedTheme = com.agentforandroid.ui.theme.AppPreferences.getThemeMode(context)
                                 var isDark by remember { mutableStateOf(savedTheme == com.agentforandroid.ui.theme.ThemeMode.DARK) }
