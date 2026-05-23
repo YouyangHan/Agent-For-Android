@@ -50,10 +50,11 @@ data class BottomNavItem(
 fun MainApp() {
     val navController = rememberNavController()
 
+    val isChinese = java.util.Locale.getDefault().language == "zh"
     val items = listOf(
-        BottomNavItem("chat", "对话", Icons.Filled.Home, Icons.Outlined.Home),
-        BottomNavItem("skills", "Skills", Icons.Filled.Star, Icons.Outlined.Star),
-        BottomNavItem("settings", "设置", Icons.Filled.Settings, Icons.Outlined.Settings),
+        BottomNavItem("chat", if (isChinese) "对话" else "Chat", Icons.Filled.Home, Icons.Outlined.Home),
+        BottomNavItem("skills", if (isChinese) "Skills" else "Skills", Icons.Filled.Star, Icons.Outlined.Star),
+        BottomNavItem("settings", if (isChinese) "设置" else "Settings", Icons.Filled.Settings, Icons.Outlined.Settings),
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
