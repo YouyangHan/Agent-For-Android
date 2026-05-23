@@ -62,9 +62,12 @@ fun ChatScreen(
     }
 
     LaunchedEffect(messages.size, streamingText) {
-        if (messages.isNotEmpty()) {
-            kotlinx.coroutines.delay(50) // wait for layout
-            listState.scrollToItem(messages.size)
+        if (messages.isNotEmpty() || streamingText.isNotEmpty()) {
+            kotlinx.coroutines.delay(50)
+            val lastIndex = listState.layoutInfo.totalItemsCount - 1
+            if (lastIndex >= 0) {
+                listState.animateScrollToItem(lastIndex)
+            }
         }
     }
 
