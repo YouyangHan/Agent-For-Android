@@ -74,6 +74,15 @@ fun ChatScreen(
         }
     }
 
+    // Show personality switch confirmation
+    val switchMsg by chatVM.personaSwitchMessage.collectAsState()
+    LaunchedEffect(switchMsg) {
+        switchMsg?.let {
+            snackbarHostState.showSnackbar(it)
+            chatVM.clearSwitchMessage()
+        }
+    }
+
     Scaffold(
         modifier = Modifier.windowInsetsPadding(WindowInsets.ime),
         topBar = {

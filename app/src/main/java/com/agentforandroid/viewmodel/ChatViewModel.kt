@@ -54,6 +54,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private var activePersonaContent: String = ""
     var didInit = false
 
+    private val _personaSwitchMessage = MutableStateFlow<String?>(null)
+    val personaSwitchMessage: StateFlow<String?> = _personaSwitchMessage.asStateFlow()
+
     fun setPersonality(skill: Skill?) {
         val oldName = _selectedPersonality.value?.name
         val newName = skill?.name
@@ -64,18 +67,20 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         } else ""
         prefs.edit().putString("last_personality", skill?.name ?: "").apply()
 
-        // Clear context when personality changes: AI won't see old persona's responses
+        // Clear context when personality actually changes
         if (oldName != newName) {
-            clearContext()
+            _messages.value = emptyList()
+            _streamingText.value = ""
+            _error.value = null
+            _isLoading.value = false
+            sendJob?.cancel()
+            val label = skill?.personalityName ?: "Default"
+            _personaSwitchMessage.value = "已切换至: $label（上下文已清空）"
         }
     }
     fun getPersonality(): Skill? = _selectedPersonality.value
 
-    private fun clearContext() {
-        _messages.value = emptyList()
-        _streamingText.value = ""
-        _error.value = null
-    }
+    fun clearSwitchMessage() { _personaSwitchMessage.value = null }
 
     fun setSelectedConfigId(id: String) { selectedConfigId = id }
     fun getSelectedConfigId(): String? {
