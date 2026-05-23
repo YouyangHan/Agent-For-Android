@@ -38,7 +38,7 @@ fun SkillManageScreen(viewModel: SkillViewModel = viewModel()) {
     var previewSkill by remember { mutableStateOf<Skill?>(null) }
     var showPersonalityDialog by remember { mutableStateOf<Skill?>(null) }
 
-    val builtinSkills = skills.filter { it.isBuiltin }
+    val builtinSkills = skills.filter { it.isBuiltin && !it.isPersonality }
     val personalitySkills = skills.filter { it.isPersonality && it.enabled }
     val userSkills = skills.filter { !it.isBuiltin && !(it.isPersonality && it.enabled) }
 

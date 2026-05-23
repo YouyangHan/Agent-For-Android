@@ -42,10 +42,10 @@ fun ChatScreen(
 
     LaunchedEffect(Unit) {
         if (configs.isNotEmpty()) {
-            val defaultId = configs.firstOrNull { it.isDefault }?.id ?: configs.first().id
-            chatVM.setSelectedConfigId(defaultId)
+            val firstId = configs.first().id
+            chatVM.setSelectedConfigId(firstId)
             chatVM.initOrCreateSession(
-                modelConfigId = defaultId,
+                modelConfigId = firstId,
                 enabledSkills = skills.filter { it.enabled }.map { it.name }
             )
         }
@@ -91,7 +91,6 @@ fun ChatScreen(
                         // Model selector
                         if (configs.isNotEmpty()) {
                             val currentConfig = configs.find { it.id == chatVM.getSelectedConfigId() }
-                                ?: configs.firstOrNull { it.isDefault }
                                 ?: configs.first()
                             Box {
                                 TextButton(onClick = { modelDropdownExpanded = true },
@@ -109,14 +108,11 @@ fun ChatScreen(
                                     configs.forEach { config ->
                                         DropdownMenuItem(
                                             text = {
-                                                Text(
-                                                    "${config.name} ${if (config.isDefault) "✓" else ""}",
-                                                    style = MaterialTheme.typography.bodySmall
-                                                )
+                                                Text(config.name,
+                                                    style = MaterialTheme.typography.bodySmall)
                                             },
                                             onClick = {
                                                 chatVM.setSelectedConfigId(config.id)
-                                                configVM.setDefault(config.id)
                                                 modelDropdownExpanded = false
                                             }
                                         )

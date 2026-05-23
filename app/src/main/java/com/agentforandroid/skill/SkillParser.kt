@@ -19,8 +19,8 @@ object SkillParser {
         "using-superpowers" to Pair("超能力引导", "启动对话时建立如何查找和使用技能"),
         "writing-plans" to Pair("计划编写", "为多步骤任务编写实施计划"),
         // Built-in personality skills
-        "tong-jincheng-perspective" to Pair("深情女", "童锦程视角：真诚情感与人际关系思维"),
-        "性感风情御姐.skill" to Pair("魅力男", "性感风情御姐：优雅魅力与成熟气质"),
+        "tong-jincheng-perspective" to Pair("深情男", "童锦程视角：真诚情感与人际关系思维"),
+        "性感风情御姐.skill" to Pair("魅力女", "性感风情御姐：优雅魅力与成熟气质"),
     )
 
     // Pinned built-in personalities - always personality, cannot be removed

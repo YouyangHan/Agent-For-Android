@@ -66,8 +66,7 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
                             ConfigItem(
                                 config = config,
                                 onClick = { editingConfig = config },
-                                onDelete = { viewModel.delete(config) },
-                                onSetDefault = { viewModel.setDefault(config.id) }
+                                onDelete = { viewModel.delete(config) }
                             )
                         }
                     }
@@ -178,8 +177,7 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
 private fun ConfigItem(
     config: ModelConfig,
     onClick: () -> Unit,
-    onDelete: () -> Unit,
-    onSetDefault: () -> Unit
+    onDelete: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).clickable { onClick() }
@@ -188,11 +186,6 @@ private fun ConfigItem(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (config.isDefault) {
-                Icon(Icons.Default.Check, contentDescription = "默认",
-                    tint = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.width(8.dp))
-            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(config.name, style = MaterialTheme.typography.titleSmall)
                 Text(config.modelId, style = MaterialTheme.typography.bodySmall,
@@ -203,7 +196,6 @@ private fun ConfigItem(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary)
             }
-            TextButton(onClick = onSetDefault) { Text("设为默认") }
             IconButton(onClick = onDelete) {
                 Icon(Icons.Default.Delete, contentDescription = "删除",
                     tint = MaterialTheme.colorScheme.error)
