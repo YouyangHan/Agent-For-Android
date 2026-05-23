@@ -1,19 +1,14 @@
 package com.agentforandroid.tool
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.provider.CalendarContract
 import android.provider.CalendarContract.Events
-import android.provider.Settings
-import android.widget.Toast
-import androidx.core.content.ContextCompat
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import org.json.JSONObject
 import java.io.File
 import java.util.Calendar
@@ -35,9 +30,6 @@ class ToolExecutor(private val context: Context) {
 通过对话创建SKILL.md文件，自动部署并导入。
 参数: {"name":"英文名","display_name":"中文名","description":"简介","content":"markdown正文"}
 注意: name只含英文数字连字符, content换行用\\n
-
-### set_alarm — 设置闹钟
-参数: {"time":"HH:MM","label":"标签"}
 
 ### add_event — 添加日历日程
 参数: {"title":"标题","time":"HH:MM","duration_minutes":60}
@@ -73,68 +65,12 @@ class ToolExecutor(private val context: Context) {
             val params = JSONObject(paramsJson)
             when (name) {
                 "create_skill" -> createSkill(params)
-                "set_alarm" -> setAlarm(params)
                 "add_event" -> addEvent(params)
                 "launch_app" -> launchApp(params)
                 else -> "❌ 未知工具: $name"
             }
         } catch (e: Exception) {
             "❌ 工具执行失败: ${e.localizedMessage}"
-        }
-    }
-
-    private fun setAlarm(params: JSONObject): String {
-        val time = params.optString("time", "")
-        val label = params.optString("label", "闹钟")
-
-        if (!time.matches(Regex("\\d{1,2}:\\d{2}"))) {
-            return "❌ 时间格式错误，请使用 HH:MM 格式"
-        }
-
-        val parts = time.split(":")
-        val hour = parts[0].toInt()
-        val minute = parts[1].toInt()
-
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-            if (timeInMillis <= System.currentTimeMillis()) {
-                add(Calendar.DAY_OF_YEAR, 1)
-            }
-        }
-
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        // Check exact alarm permission on Android 12+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!alarmManager.canScheduleExactAlarms()) {
-                // Open system settings for the user to grant
-                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                    data = Uri.parse("package:${context.packageName}")
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(intent)
-                return "⚠️ 已打开权限设置页，请允许「闹钟和提醒」权限后重试"
-            }
-        }
-
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("label", label)
-        }
-        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, label.hashCode(), intent, flags
-        )
-
-        try {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
-            )
-            return "✅ 闹钟已设置: ${time} $label (${if (calendar.timeInMillis <= System.currentTimeMillis()) "明天" else "今天"})"
-        } catch (e: SecurityException) {
-            return "❌ 闹钟权限不足: ${e.localizedMessage}"
         }
     }
 

@@ -73,7 +73,6 @@ AI 可通过 `[TOOL:name:{...}]` 格式调用手机功能：
 
 | 工具 | 功能 |
 |------|------|
-| `set_alarm` | 设置闹钟 |
 | `add_event` | 添加日历日程 |
 | `launch_app` | 启动其他应用 |
 | `create_skill` | 对话中创建新 Skill |
