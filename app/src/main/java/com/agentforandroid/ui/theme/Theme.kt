@@ -18,6 +18,7 @@ object AppPreferences {
     private const val PREFS_NAME = "app_prefs"
     private const val KEY_THEME = "theme_mode"
     private const val KEY_LANG = "language"
+    private const val KEY_APP_NAME = "app_name"
 
     fun getThemeMode(context: Context): ThemeMode {
         val v = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -38,6 +39,16 @@ object AppPreferences {
     fun setLanguage(context: Context, lang: String) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .edit().putString(KEY_LANG, lang).apply()
+    }
+
+    fun getAppName(context: Context): String {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(KEY_APP_NAME, "Agent Yang") ?: "Agent Yang"
+    }
+
+    fun setAppName(context: Context, name: String) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putString(KEY_APP_NAME, name).apply()
     }
 }
 

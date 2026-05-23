@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.agentforandroid.model.Message
@@ -86,7 +87,11 @@ fun ChatScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Agent Yang") }
+                title = {
+                    val ctx = LocalContext.current
+                    val name = com.agentforandroid.ui.theme.AppPreferences.getAppName(ctx)
+                    Text(name)
+                }
             )
         },
         floatingActionButton = {

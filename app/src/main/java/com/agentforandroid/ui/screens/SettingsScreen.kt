@@ -75,6 +75,32 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
             } else {
                 // General settings
                 LazyColumn {
+                    // App name
+                    item {
+                        Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text("应用名称", style = MaterialTheme.typography.titleSmall)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                val context = LocalContext.current
+                                var appName by remember {
+                                    mutableStateOf(com.agentforandroid.ui.theme.AppPreferences.getAppName(context))
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    OutlinedTextField(
+                                        value = appName,
+                                        onValueChange = { appName = it },
+                                        singleLine = true,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Button(onClick = {
+                                        com.agentforandroid.ui.theme.AppPreferences.setAppName(context, appName.trim())
+                                    }) { Text("保存") }
+                                }
+                            }
+                        }
+                    }
+
                     // Language & Theme
                     item {
                         Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
