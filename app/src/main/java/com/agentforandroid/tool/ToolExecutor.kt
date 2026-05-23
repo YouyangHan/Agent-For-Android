@@ -10,28 +10,37 @@ import android.provider.CalendarContract
 import android.provider.CalendarContract.Events
 import android.widget.Toast
 import org.json.JSONObject
+import java.io.File
 import java.util.Calendar
 
 class ToolExecutor(private val context: Context) {
+    // Callback to reload skills after create_skill
+    var onSkillCreated: (() -> Unit)? = null
+
+    private val userSkillsPath: String by lazy {
+        com.agentforandroid.repository.SkillRepository.getInstance(context).getUserSkillsPath()
+    }
 
     companion object {
         val TOOL_DESCRIPTIONS = """
 ## 可用工具
-你可以使用以下工具操作手机。在回复中使用格式: [TOOL:工具名:{"参数":"值"}]
+你可以使用以下工具。在回复中使用格式: [TOOL:工具名:{"参数":"值"}]
+
+### create_skill — 创建新Skill
+通过对话创建SKILL.md文件，自动部署并导入。
+参数: {"name":"英文名","display_name":"中文名","description":"简介","content":"markdown正文"}
+注意: name只含英文数字连字符, content换行用\\n
 
 ### set_alarm — 设置闹钟
 参数: {"time":"HH:MM","label":"标签"}
-示例: [TOOL:set_alarm:{"time":"08:00","label":"起床"}]
 
 ### add_event — 添加日历日程
 参数: {"title":"标题","time":"HH:MM","duration_minutes":60}
-示例: [TOOL:add_event:{"title":"会议","time":"14:00","duration_minutes":30}]
 
 ### launch_app — 启动应用
 参数: {"app_name":"应用名"}
-示例: [TOOL:launch_app:{"app_name":"计算器"}]
 
-重要: 工具调用放在回复的最前面，一行一个。
+重要: 工具调用放在回复最前面，一行一个。
 """.trimIndent()
     }
 
@@ -58,6 +67,7 @@ class ToolExecutor(private val context: Context) {
         return try {
             val params = JSONObject(paramsJson)
             when (name) {
+                "create_skill" -> createSkill(params)
                 "set_alarm" -> setAlarm(params)
                 "add_event" -> addEvent(params)
                 "launch_app" -> launchApp(params)
@@ -145,6 +155,30 @@ class ToolExecutor(private val context: Context) {
         } else {
             "❌ 添加日程失败，请检查日历权限"
         }
+    }
+
+    private fun createSkill(params: JSONObject): String {
+        val name = params.optString("name", "").trim()
+        val displayName = params.optString("display_name", name).trim()
+        val description = params.optString("description", "").trim()
+        val content = params.optString("content", "").trim().replace("\\n", "\n")
+
+        if (name.isBlank()) return "❌ skill名称不能为空"
+        if (!name.matches(Regex("^[a-zA-Z0-9_-]+$"))) return "❌ name只能用英文/数字/连字符"
+
+        val skillDir = File(userSkillsPath, name)
+        if (!skillDir.exists()) skillDir.mkdirs()
+
+        val skillMd = File(skillDir, "SKILL.md")
+        val frontmatter = "---\nname: $name\ndescription: $description\n---\n"
+        val fullContent = frontmatter + "\n" +
+            "# $displayName\n\n" +
+            if (description.isNotBlank()) "> $description\n\n" else "" +
+            content
+
+        skillMd.writeText(fullContent)
+        onSkillCreated?.invoke()
+        return "✅ Skill '$displayName' 已创建并导入: ${skillDir.absolutePath}"
     }
 
     fun launchApp(params: JSONObject): String {

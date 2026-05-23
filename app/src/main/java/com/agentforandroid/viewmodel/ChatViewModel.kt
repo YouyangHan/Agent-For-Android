@@ -20,7 +20,11 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val chatRepo = ChatRepository(app.database)
     private val configRepo = ConfigRepository(app.database)
     private val skillRepo = com.agentforandroid.repository.SkillRepository.getInstance(application)
-    private val toolExecutor = com.agentforandroid.tool.ToolExecutor(application)
+    private val toolExecutor = com.agentforandroid.tool.ToolExecutor(application).apply {
+        onSkillCreated = {
+            skillRepo.reloadSkills()
+        }
+    }
 
     private val prefs = application.getSharedPreferences("chat_prefs", android.content.Context.MODE_PRIVATE)
     private var sendJob: kotlinx.coroutines.Job? = null
