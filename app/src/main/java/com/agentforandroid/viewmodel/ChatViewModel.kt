@@ -48,9 +48,19 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _personalitySkills = MutableStateFlow<List<Skill>>(emptyList())
     val personalitySkills: StateFlow<List<Skill>> = _personalitySkills.asStateFlow()
 
-    // Observable personality selection
+    // Personality: store content directly, independent of skill system
     private val _selectedPersonality = MutableStateFlow<Skill?>(null)
     val selectedPersonality: StateFlow<Skill?> = _selectedPersonality.asStateFlow()
+    private var activePersonaContent: String = ""
+
+    fun setPersonality(skill: Skill?) {
+        _selectedPersonality.value = skill
+        activePersonaContent = if (skill != null) {
+            if (skill.content.length > 3000) skill.content.take(3000) + "\n...(truncated)"
+            else skill.content
+        } else ""
+    }
+    fun getPersonality(): Skill? = _selectedPersonality.value
 
     fun setSelectedConfigId(id: String) { selectedConfigId = id }
     fun getSelectedConfigId(): String? {
@@ -60,13 +70,11 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         return selectedConfigId
     }
 
-    fun setPersonality(skill: Skill?) { _selectedPersonality.value = skill }
-    fun getPersonality(): Skill? = _selectedPersonality.value
-
     fun restorePersonality() {
         val savedName = prefs.getString("last_personality", "") ?: ""
         if (savedName.isNotBlank()) {
-            _selectedPersonality.value = skillRepo.skills.value.find { it.name == savedName && it.isPersonality }
+            val skill = skillRepo.skills.value.find { it.name == savedName && it.isPersonality }
+            setPersonality(skill)  // uses setPersonality which sets both state + content
         }
     }
 
@@ -146,19 +154,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                // System prompt: personality OR default, never both
-                val persona = _selectedPersonality.value
+                // System prompt: activePersonaContent is set atomically in setPersonality()
                 var systemPrompt: String
-                if (persona != null) {
-                    val pBody = if (persona.content.length > 3000)
-                        persona.content.take(3000) + "\n...(truncated)"
-                    else persona.content
-                    systemPrompt = "$pBody\n\nCurrent model: ${config.name}\nActive personality: ${persona.personalityName}"
+                if (activePersonaContent.isNotEmpty()) {
+                    systemPrompt = "$activePersonaContent\n\nCurrent model: ${config.name}"
                 } else {
                     systemPrompt = "$BASE_SYSTEM_PROMPT\nCurrent model: ${config.name}"
                 }
 
-                // Only inject NON-personality skills + tools
+                // Only NON-personality skills + tools
                 val regularSkills = skillRepo.getEnabledSkills().filter { !it.isPersonality }
                 systemPrompt = chatRepo.buildSystemPrompt(systemPrompt, regularSkills)
                 systemPrompt += "\n\n" + com.agentforandroid.tool.ToolExecutor.TOOL_DESCRIPTIONS
