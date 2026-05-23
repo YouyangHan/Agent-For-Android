@@ -60,6 +60,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             if (skill.content.length > 3000) skill.content.take(3000) + "\n...(truncated)"
             else skill.content
         } else ""
+        // Persist immediately to SharedPreferences
+        prefs.edit().putString("last_personality", skill?.name ?: "").apply()
     }
     fun getPersonality(): Skill? = _selectedPersonality.value
 
@@ -235,7 +237,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
-        prefs.edit().putString("last_personality", _selectedPersonality.value?.name ?: "").apply()
         prefs.edit().putString("last_config_id", selectedConfigId ?: "").apply()
         chatRepo.shutdown()
     }
