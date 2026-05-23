@@ -146,18 +146,21 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                // Personality injected only when selected (not Default)
-                var systemPrompt = "$BASE_SYSTEM_PROMPT\nCurrent model: ${config.name}"
-                if (_selectedPersonality.value != null) {
-                    val p = _selectedPersonality.value!!
-                    val pBody = if (p.content.length > 3000) p.content.take(3000) + "\n...(truncated)" else p.content
-                    systemPrompt = pBody + "\n\n" + systemPrompt
+                // System prompt: personality OR default, never both
+                val persona = _selectedPersonality.value
+                var systemPrompt: String
+                if (persona != null) {
+                    val pBody = if (persona.content.length > 3000)
+                        persona.content.take(3000) + "\n...(truncated)"
+                    else persona.content
+                    systemPrompt = "$pBody\n\nCurrent model: ${config.name}\nActive personality: ${persona.personalityName}"
+                } else {
+                    systemPrompt = "$BASE_SYSTEM_PROMPT\nCurrent model: ${config.name}"
                 }
 
-                // Regular skills: exclude ALL personality skills (only selected one is injected above)
-                val enabledSkills = skillRepo.getEnabledSkills()
-                    .filter { !it.isPersonality }
-                systemPrompt = chatRepo.buildSystemPrompt(systemPrompt, enabledSkills)
+                // Only inject NON-personality skills + tools
+                val regularSkills = skillRepo.getEnabledSkills().filter { !it.isPersonality }
+                systemPrompt = chatRepo.buildSystemPrompt(systemPrompt, regularSkills)
                 systemPrompt += "\n\n" + com.agentforandroid.tool.ToolExecutor.TOOL_DESCRIPTIONS
 
                 // Build messages for LLM
