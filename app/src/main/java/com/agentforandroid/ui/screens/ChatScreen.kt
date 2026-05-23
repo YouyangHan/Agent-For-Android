@@ -51,10 +51,14 @@ fun ChatScreen(
         }
     }
 
-    // Refresh personality list whenever skills change + restore saved personality
+    // Refresh personality list when skills change (restore only once on first load)
+    var personaRestored by remember { mutableStateOf(false) }
     LaunchedEffect(skills) {
         chatVM.refreshPersonalities()
-        chatVM.restorePersonality()
+        if (!personaRestored && skills.isNotEmpty()) {
+            chatVM.restorePersonality()
+            personaRestored = true
+        }
     }
 
     LaunchedEffect(messages.size, streamingText) {
