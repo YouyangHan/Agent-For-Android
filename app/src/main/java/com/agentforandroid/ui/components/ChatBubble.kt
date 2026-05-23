@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -21,6 +22,8 @@ fun ChatBubble(
 ) {
     val context = LocalContext.current
     val markwon = rememberMarkwon()
+    val textColor = if (isUser) android.graphics.Color.WHITE
+        else MaterialTheme.colorScheme.onSurface.toArgb()
 
     Row(
         modifier = modifier
@@ -48,6 +51,7 @@ fun ChatBubble(
                         setPadding(32, 16, 32, 16)
                         setTextIsSelectable(true)
                         textSize = 15f
+                        setTextColor(textColor)
                     }
                 },
                 update = { textView ->
