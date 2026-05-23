@@ -36,8 +36,8 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 | 模型名称 | 自定义显示名称 | DeepSeek V4 |
 | 模型 ID | API 模型标识 | deepseek-v4-pro |
 | API Key | 你的密钥 | sk-xxx |
-| Base URL | API 端点 | https://api.deepseek.com |
-| API 类型 | OpenAI / Anthropic | OpenAI |
+| Base URL | API 端点 | https://api.deepseek.com/anthropic |
+| API 类型 | OpenAI / Anthropic | Anthropic |
 
 ---
 
