@@ -151,9 +151,9 @@ AgentForAndroid/
 | 项目 | 说明 |
 |------|------|
 | [HelloAgents](https://github.com/datawhalechina/hello-agents) | Datawhale 开源的多智能体框架，提供了 Agent 范式、Skill 系统的核心设计理念 |
-| [童锦程.skill](https://github.com/jjyaoao/skill-tongjincheng) | 深情男性格 Skill，童锦程"深情祖师爷"视角 |
-| [性感风情御姐.skill](https://github.com/jjyaoao/charm-mature-skill) | 魅力女性格 Skill，优雅成熟女性魅力 |
-| [agent-skill-creator](https://github.com/jjyaoao/agent-skill-creator) | Skill 创建与导入工具链参考 |
+| [童锦程.skill](https://github.com/neko233-com/skill-tongjincheng) | 深情男性格 Skill，童锦程"深情祖师爷"视角 |
+| [性感风情御姐.skill](https://github.com/zhangzhanglaila/charm-mature-skill) | 魅力女性格 Skill，优雅成熟女性魅力 |
+| [agent-skill-creator](https://github.com/FrancyJGLisboa/agent-skill-creator) | Skill 创建与导入工具链参考 |
 
 ---
 
