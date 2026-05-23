@@ -9,6 +9,8 @@
 
 Agent Yang 是一个运行在 Android 手机上的 AI Agent 应用。支持多模型 API 配置、流式对话、可插拔 Skill 系统、性格切换、手机工具调用。
 
+📥 [下载 APK (V1.0.0.0)](https://github.com/YouyangHan/Agent-For-Android/releases/tag/V1.0.0.0)
+
 **本项目由一名 C++ 工程师在 AI Agent（Claude Code）辅助下独立开发完成，零 Android 开发经验起步。**
 
 ---
