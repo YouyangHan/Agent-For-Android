@@ -110,12 +110,7 @@ fun ChatScreen(
                 }
                 // Clear context
                 FloatingActionButton(
-                    onClick = {
-                        chatVM.clearSession()
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar("上下文已清空")
-                        }
-                    },
+                    onClick = { chatVM.clearSession() },
                     modifier = Modifier.size(40.dp),
                     containerColor = MaterialTheme.colorScheme.errorContainer
                 ) {

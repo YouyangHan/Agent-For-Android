@@ -128,23 +128,19 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
                                 HorizontalDivider()
                                 Spacer(modifier = Modifier.height(8.dp))
 
-                                // Theme toggle
+                                // Theme toggle (Light/Dark only)
                                 val savedTheme = com.agentforandroid.ui.theme.AppPreferences.getThemeMode(context)
-                                var themeMode by remember { mutableStateOf(savedTheme.value) }
-                                val themeLabel = when(themeMode) { 0->"跟随系统"; 1->"浅色"; 2->"深色"; else->"" }
+                                var isDark by remember { mutableStateOf(savedTheme == com.agentforandroid.ui.theme.ThemeMode.DARK) }
                                 Row(verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth()) {
-                                    Text("主题", modifier = Modifier.weight(1f))
-                                    Text(themeLabel, style = MaterialTheme.typography.labelSmall)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    TextButton(onClick = {
-                                        val next = (themeMode + 1) % 3
-                                        themeMode = next
-                                        com.agentforandroid.ui.theme.AppPreferences.setThemeMode(
-                                            context, com.agentforandroid.ui.theme.ThemeMode.fromValue(next))
-                                        // Recreate activity to apply theme
+                                    Text("深色模式", modifier = Modifier.weight(1f))
+                                    Switch(checked = isDark, onCheckedChange = { dark ->
+                                        isDark = dark
+                                        val mode = if (dark) com.agentforandroid.ui.theme.ThemeMode.DARK
+                                            else com.agentforandroid.ui.theme.ThemeMode.LIGHT
+                                        com.agentforandroid.ui.theme.AppPreferences.setThemeMode(context, mode)
                                         (context as? android.app.Activity)?.recreate()
-                                    }) { Text(themeLabel) }
+                                    })
                                 }
                             }
                         }

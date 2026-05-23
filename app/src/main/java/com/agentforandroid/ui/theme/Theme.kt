@@ -7,10 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 enum class ThemeMode(val value: Int) {
-    SYSTEM(0), LIGHT(1), DARK(2);
+    LIGHT(0), DARK(1);
 
     companion object {
-        fun fromValue(v: Int) = entries.find { it.value == v } ?: SYSTEM
+        fun fromValue(v: Int) = entries.find { it.value == v } ?: LIGHT
     }
 }
 
@@ -77,11 +77,7 @@ fun AgentForAndroidTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
     content: @Composable () -> Unit
 ) {
-    val darkTheme = when (themeMode) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-    }
+    val darkTheme = themeMode == ThemeMode.DARK
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColors else LightColors,
         content = content
