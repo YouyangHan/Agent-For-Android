@@ -52,7 +52,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedPersonality = MutableStateFlow<Skill?>(null)
     val selectedPersonality: StateFlow<Skill?> = _selectedPersonality.asStateFlow()
     private var activePersonaContent: String = ""
-    private var didInit = false
+    var didInit = false
 
     fun setPersonality(skill: Skill?) {
         _selectedPersonality.value = skill
@@ -69,17 +69,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             selectedConfigId = prefs.getString("last_config_id", null)
         }
         return selectedConfigId
-    }
-
-    fun isInitialized(): Boolean = didInit
-    fun markInitialized() { didInit = true }
-
-    suspend fun initIfNeeded(configId: String, enabledSkills: List<String>) {
-        if (!didInit) {
-            initOrCreateSession(configId, enabledSkills)
-            restorePersonality()
-            didInit = true
-        }
     }
 
     fun restorePersonality() {
