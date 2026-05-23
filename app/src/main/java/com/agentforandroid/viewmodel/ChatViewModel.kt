@@ -76,6 +76,11 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             sendJob?.cancel()
             val label = skill?.personalityName ?: "Default"
             _personaSwitchMessage.value = "已切换至: $label（上下文已清空）"
+            // Auto-clear after shown
+            viewModelScope.launch {
+                kotlinx.coroutines.delay(3000)
+                _personaSwitchMessage.value = null
+            }
         }
     }
     fun getPersonality(): Skill? = _selectedPersonality.value
@@ -89,6 +94,11 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         _error.value = null
         _isLoading.value = false
         currentSession = null
+        _personaSwitchMessage.value = "上下文已清空"
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(3000)
+            _personaSwitchMessage.value = null
+        }
     }
 
     fun setSelectedConfigId(id: String) { selectedConfigId = id }

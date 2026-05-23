@@ -26,13 +26,15 @@ import com.agentforandroid.ui.screens.ChatScreen
 import com.agentforandroid.ui.screens.SettingsScreen
 import com.agentforandroid.ui.screens.SkillManageScreen
 import com.agentforandroid.ui.theme.AgentForAndroidTheme
+import com.agentforandroid.ui.theme.AppPreferences
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AgentForAndroidTheme {
+            val themeMode = AppPreferences.getThemeMode(this)
+            AgentForAndroidTheme(themeMode = themeMode) {
                 MainApp()
             }
         }

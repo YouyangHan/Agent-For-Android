@@ -1,9 +1,45 @@
 package com.agentforandroid.ui.theme
 
+import android.content.Context
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+
+enum class ThemeMode(val value: Int) {
+    SYSTEM(0), LIGHT(1), DARK(2);
+
+    companion object {
+        fun fromValue(v: Int) = entries.find { it.value == v } ?: SYSTEM
+    }
+}
+
+object AppPreferences {
+    private const val PREFS_NAME = "app_prefs"
+    private const val KEY_THEME = "theme_mode"
+    private const val KEY_LANG = "language"
+
+    fun getThemeMode(context: Context): ThemeMode {
+        val v = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getInt(KEY_THEME, 0)
+        return ThemeMode.fromValue(v)
+    }
+
+    fun setThemeMode(context: Context, mode: ThemeMode) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putInt(KEY_THEME, mode.value).apply()
+    }
+
+    fun getLanguage(context: Context): String {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(KEY_LANG, "zh") ?: "zh"
+    }
+
+    fun setLanguage(context: Context, lang: String) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putString(KEY_LANG, lang).apply()
+    }
+}
 
 private val LightColors = lightColorScheme(
     primary = Color(0xFF1A73E8),
@@ -27,9 +63,14 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun AgentForAndroidTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
     content: @Composable () -> Unit
 ) {
+    val darkTheme = when (themeMode) {
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColors else LightColors,
         content = content

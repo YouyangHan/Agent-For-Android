@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -82,15 +83,19 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
                                 Spacer(modifier = Modifier.height(12.dp))
 
                                 // Language toggle
-                                var isChinese by remember { mutableStateOf(true) }
+                                val context = LocalContext.current
+                                val savedLang = com.agentforandroid.ui.theme.AppPreferences.getLanguage(context)
+                                var isChinese by remember { mutableStateOf(savedLang == "zh") }
                                 Row(verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth()) {
                                     Text("语言 / Language", modifier = Modifier.weight(1f))
                                     Text(if (isChinese) "中文" else "EN",
                                         style = MaterialTheme.typography.labelSmall)
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Switch(checked = isChinese,
-                                        onCheckedChange = { isChinese = it })
+                                    Switch(checked = isChinese, onCheckedChange = { ch ->
+                                        isChinese = ch
+                                        com.agentforandroid.ui.theme.AppPreferences.setLanguage(context, if (ch) "zh" else "en")
+                                    })
                                 }
 
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -98,7 +103,8 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 // Theme toggle
-                                var themeMode by remember { mutableStateOf(0) } // 0=system, 1=light, 2=dark
+                                val savedTheme = com.agentforandroid.ui.theme.AppPreferences.getThemeMode(context)
+                                var themeMode by remember { mutableStateOf(savedTheme.value) }
                                 val themeLabel = when(themeMode) { 0->"跟随系统"; 1->"浅色"; 2->"深色"; else->"" }
                                 Row(verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth()) {
@@ -106,7 +112,12 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
                                     Text(themeLabel, style = MaterialTheme.typography.labelSmall)
                                     Spacer(modifier = Modifier.width(8.dp))
                                     TextButton(onClick = {
-                                        themeMode = (themeMode + 1) % 3
+                                        val next = (themeMode + 1) % 3
+                                        themeMode = next
+                                        com.agentforandroid.ui.theme.AppPreferences.setThemeMode(
+                                            context, com.agentforandroid.ui.theme.ThemeMode.fromValue(next))
+                                        // Recreate activity to apply theme
+                                        (context as? android.app.Activity)?.recreate()
                                     }) { Text(themeLabel) }
                                 }
                             }
