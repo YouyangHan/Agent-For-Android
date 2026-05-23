@@ -133,7 +133,7 @@ fun ChatScreen(
 
                         // Personality selector
                         var personalityExpanded by remember { mutableStateOf(false) }
-                        val currentPersonality = chatVM.getPersonality()
+                        val currentPersonality by chatVM.selectedPersonality.collectAsState()
                         Box {
                             TextButton(onClick = { personalityExpanded = true },
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)

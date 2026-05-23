@@ -40,7 +40,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     private var currentSession: ChatSession? = null
 
-    private var selectedPersonality: Skill? = null
     private var selectedConfigId: String? = null
 
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
@@ -48,6 +47,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _personalitySkills = MutableStateFlow<List<Skill>>(emptyList())
     val personalitySkills: StateFlow<List<Skill>> = _personalitySkills.asStateFlow()
+
+    // Observable personality selection
+    private val _selectedPersonality = MutableStateFlow<Skill?>(null)
+    val selectedPersonality: StateFlow<Skill?> = _selectedPersonality.asStateFlow()
 
     fun setSelectedConfigId(id: String) { selectedConfigId = id }
     fun getSelectedConfigId(): String? {
@@ -57,22 +60,21 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         return selectedConfigId
     }
 
-    // Personality selection (in-memory only, persisted on clear)
-    fun setPersonality(skill: Skill?) { selectedPersonality = skill }
-    fun getPersonality(): Skill? = selectedPersonality
+    fun setPersonality(skill: Skill?) { _selectedPersonality.value = skill }
+    fun getPersonality(): Skill? = _selectedPersonality.value
 
     fun restorePersonality() {
         val savedName = prefs.getString("last_personality", "") ?: ""
         if (savedName.isNotBlank()) {
-            selectedPersonality = skillRepo.skills.value.find { it.name == savedName && it.isPersonality }
+            _selectedPersonality.value = skillRepo.skills.value.find { it.name == savedName && it.isPersonality }
         }
     }
 
     fun refreshPersonalities() {
         _personalitySkills.value = skillRepo.getPersonalitySkills()
-        if (selectedPersonality != null) {
-            val stillExists = _personalitySkills.value.any { it.name == selectedPersonality!!.name }
-            if (!stillExists) selectedPersonality = null
+        if (_selectedPersonality.value != null) {
+            val stillExists = _personalitySkills.value.any { it.name == _selectedPersonality.value!!.name }
+            if (!stillExists) _selectedPersonality.value = null
         }
     }
 
@@ -144,21 +146,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                // Active personality name for prompt
-                val personaName = selectedPersonality?.personalityName ?: "无"
-                var systemPrompt = "$BASE_SYSTEM_PROMPT\nCurrent model: ${config.name}\nActive personality: $personaName"
-
-                // Personality injected only when explicitly selected (not Default)
-                if (selectedPersonality != null) {
-                    val p = selectedPersonality!!
+                // Personality injected only when selected (not Default)
+                var systemPrompt = "$BASE_SYSTEM_PROMPT\nCurrent model: ${config.name}"
+                if (_selectedPersonality.value != null) {
+                    val p = _selectedPersonality.value!!
                     val pBody = if (p.content.length > 3000) p.content.take(3000) + "\n...(truncated)" else p.content
                     systemPrompt = pBody + "\n\n" + systemPrompt
-                    systemPrompt += "\n\n注意: 你正在使用 '$personaName' 性格。请完全按照此性格设定回复。"
-                } else {
-                    systemPrompt += "\n\n注意: 你没有使用任何性格设定。请以默认AI助手身份回复。"
                 }
 
-                // Regular skills (exclude personality skills) + tools
+                // Regular skills: exclude ALL personality skills (only selected one is injected above)
                 val enabledSkills = skillRepo.getEnabledSkills()
                     .filter { !it.isPersonality }
                 systemPrompt = chatRepo.buildSystemPrompt(systemPrompt, enabledSkills)
@@ -231,7 +227,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
-        prefs.edit().putString("last_personality", selectedPersonality?.name ?: "").apply()
+        prefs.edit().putString("last_personality", _selectedPersonality.value?.name ?: "").apply()
         prefs.edit().putString("last_config_id", selectedConfigId ?: "").apply()
         chatRepo.shutdown()
     }
