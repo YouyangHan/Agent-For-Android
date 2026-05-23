@@ -120,7 +120,10 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Switch(checked = isChinese, onCheckedChange = { ch ->
                                         isChinese = ch
-                                        com.agentforandroid.ui.theme.AppPreferences.setLanguage(context, if (ch) "zh" else "en")
+                                        val lang = if (ch) "zh" else "en"
+                                        com.agentforandroid.ui.theme.AppPreferences.setLanguage(context, lang)
+                                        com.agentforandroid.AgentApp.setLocale(context, lang)
+                                        (context as? android.app.Activity)?.recreate()
                                     })
                                 }
 
@@ -213,6 +216,10 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
                                     style = MaterialTheme.typography.bodySmall)
                                 Text("支持多模型、Skill 扩展、手机工具调用",
                                     style = MaterialTheme.typography.bodySmall)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("Created by HanYouyang with AI Agent assistance",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.secondary)
                             }
                         }
                     }
