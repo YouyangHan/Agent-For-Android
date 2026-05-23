@@ -109,6 +109,7 @@ fun SettingsScreen(viewModel: ConfigViewModel = viewModel()) {
                                 Spacer(modifier = Modifier.height(12.dp))
 
                                 // Theme toggle (Light/Dark only)
+                                val context = LocalContext.current
                                 val savedTheme = com.agentforandroid.ui.theme.AppPreferences.getThemeMode(context)
                                 var isDark by remember { mutableStateOf(savedTheme == com.agentforandroid.ui.theme.ThemeMode.DARK) }
                                 Row(verticalAlignment = Alignment.CenterVertically,
