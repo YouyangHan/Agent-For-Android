@@ -225,10 +225,8 @@ private fun PersonalitySkillCard(
                     tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(skill.personalityName.ifBlank { skill.name },
+                    Text(skill.personalityName.ifBlank { skill.displayName },
                         style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                    Text(skill.name, style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.secondary)
                 }
             }
             // Only show remove button for non-pinned personalities
