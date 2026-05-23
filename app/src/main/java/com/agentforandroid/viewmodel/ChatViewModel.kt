@@ -55,15 +55,27 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     var didInit = false
 
     fun setPersonality(skill: Skill?) {
+        val oldName = _selectedPersonality.value?.name
+        val newName = skill?.name
         _selectedPersonality.value = skill
         activePersonaContent = if (skill != null) {
             if (skill.content.length > 3000) skill.content.take(3000) + "\n...(truncated)"
             else skill.content
         } else ""
-        // Persist immediately to SharedPreferences
         prefs.edit().putString("last_personality", skill?.name ?: "").apply()
+
+        // Clear context when personality changes: AI won't see old persona's responses
+        if (oldName != newName) {
+            clearContext()
+        }
     }
     fun getPersonality(): Skill? = _selectedPersonality.value
+
+    private fun clearContext() {
+        _messages.value = emptyList()
+        _streamingText.value = ""
+        _error.value = null
+    }
 
     fun setSelectedConfigId(id: String) { selectedConfigId = id }
     fun getSelectedConfigId(): String? {
