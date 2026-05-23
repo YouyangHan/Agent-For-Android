@@ -59,7 +59,8 @@ fun ChatScreen(
 
     LaunchedEffect(messages.size, streamingText) {
         if (messages.isNotEmpty()) {
-            listState.animateScrollToItem(messages.size - 1)
+            kotlinx.coroutines.delay(50) // wait for layout
+            listState.scrollToItem(messages.size)
         }
     }
 
@@ -168,7 +169,7 @@ fun ChatScreen(
 
                 MessageInput(
                     onSend = { text -> chatVM.sendMessage(text) },
-                    enabled = !isLoading
+                    enabled = true
                 )
             }
         },

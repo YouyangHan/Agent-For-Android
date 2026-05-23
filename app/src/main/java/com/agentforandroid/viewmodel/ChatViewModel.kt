@@ -23,6 +23,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val toolExecutor = com.agentforandroid.tool.ToolExecutor(application)
 
     private val prefs = application.getSharedPreferences("chat_prefs", android.content.Context.MODE_PRIVATE)
+    private var sendJob: kotlinx.coroutines.Job? = null
 
     private val _streamingText = MutableStateFlow("")
     val streamingText: StateFlow<String> = _streamingText.asStateFlow()
@@ -90,7 +91,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun sendMessage(text: String) {
-        viewModelScope.launch {
+        // Cancel previous send if still running
+        sendJob?.cancel()
+        sendJob = viewModelScope.launch {
             try {
                 // Get or create session inline (robust against LaunchedEffect timing)
                 val session = currentSession ?: run {
