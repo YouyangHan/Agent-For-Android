@@ -5,10 +5,15 @@ import android.app.PendingIntent
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.provider.CalendarContract
 import android.provider.CalendarContract.Events
+import android.provider.Settings
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import android.Manifest
+import android.content.pm.PackageManager
 import org.json.JSONObject
 import java.io.File
 import java.util.Calendar
@@ -105,7 +110,13 @@ class ToolExecutor(private val context: Context) {
         // Check exact alarm permission on Android 12+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
-                return "❌ 需要精确闹钟权限。请在系统设置中授权"
+                // Open system settings for the user to grant
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                return "⚠️ 已打开权限设置页，请允许「闹钟和提醒」权限后重试"
             }
         }
 
@@ -128,6 +139,12 @@ class ToolExecutor(private val context: Context) {
     }
 
     private fun addEvent(params: JSONObject): String {
+        // Check calendar permission
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_CALENDAR)
+            != PackageManager.PERMISSION_GRANTED) {
+            return "❌ 需要日历权限。请在系统设置 → 应用 → Agent Yang → 权限中允许"
+        }
+
         val title = params.optString("title", "日程")
         val time = params.optString("time", "")
         val durationMin = params.optInt("duration_minutes", 60)
