@@ -40,25 +40,25 @@ fun ChatScreen(
 
     var modelDropdownExpanded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        if (configs.isNotEmpty()) {
+    // Init once: session + restore saved personality
+    var didInit by remember { mutableStateOf(false) }
+    LaunchedEffect(configs, skills) {
+        if (!didInit && configs.isNotEmpty() && skills.isNotEmpty()) {
             val firstId = configs.first().id
             chatVM.setSelectedConfigId(firstId)
             chatVM.initOrCreateSession(
                 modelConfigId = firstId,
                 enabledSkills = skills.filter { it.enabled }.map { it.name }
             )
+            chatVM.refreshPersonalities()
+            chatVM.restorePersonality()
+            didInit = true
         }
     }
 
-    // Refresh personality list when skills change (restore only once on first load)
-    var personaRestored by remember { mutableStateOf(false) }
+    // Keep personality list updated as skills change (don't re-restore)
     LaunchedEffect(skills) {
-        chatVM.refreshPersonalities()
-        if (!personaRestored && skills.isNotEmpty()) {
-            chatVM.restorePersonality()
-            personaRestored = true
-        }
+        if (didInit) chatVM.refreshPersonalities()
     }
 
     LaunchedEffect(messages.size, streamingText) {
