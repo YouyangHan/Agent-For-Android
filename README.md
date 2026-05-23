@@ -157,6 +157,17 @@ AgentForAndroid/
 
 ---
 
+## 免责声明
+
+**本项目全部代码由 AI Agent（Claude Code）生成，项目作者（HanYouyang）仅提供需求描述与测试验证。**
+
+- 作者不具有 Android/Kotlin 开发经验，项目中所有技术决策、代码实现均由 AI 完成
+- 本项目仅供学习交流使用，使用者自行承担使用风险
+- 项目中引用的性格 Skill 内容版权归原作者所有
+- 不得将本项目用于任何违法违规用途
+
+---
+
 ## 许可证
 
 MIT License © 2026 HanYouyang
