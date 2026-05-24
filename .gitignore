@@ -1,3 +1,6 @@
 *.hprof
 resource/wx.jpg
 resource/zhifubao.jpg
+.gradle/
+app/build/
+build/
