@@ -202,9 +202,9 @@ fun SkillManageScreen(viewModel: SkillViewModel = viewModel()) {
 // Built-in: name + description + toggle only, NO personality button
 @Composable
 private fun BuiltinSkillCard(skill: Skill, viewModel: SkillViewModel, onClick: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).clickable { onClick() }) {
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
         Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(1f).clickable { onClick() }) {
                 Text(skill.displayName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(skill.displayDescription, style = MaterialTheme.typography.bodySmall,
@@ -220,13 +220,13 @@ private fun BuiltinSkillCard(skill: Skill, viewModel: SkillViewModel, onClick: (
 private fun PersonalitySkillCard(
     skill: Skill, viewModel: SkillViewModel, onClick: () -> Unit, onRemovePersonality: () -> Unit
 ) {
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).clickable { onClick() }) {
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
         Column {
             Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Star, contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(1f).clickable { onClick() }) {
                     Text(skill.personalityName.ifBlank { skill.displayName },
                         style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 }
@@ -251,10 +251,10 @@ private fun UserSkillCard(
     skill: Skill, viewModel: SkillViewModel, onClick: () -> Unit, onPromote: () -> Unit
 ) {
     var showDeleteConfirm by remember { mutableStateOf(false) }
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).clickable { onClick() }) {
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
         Column {
             Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(1f).clickable { onClick() }) {
                     Text(skill.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     if (skill.description.isNotBlank()) {
                         Spacer(modifier = Modifier.height(2.dp))

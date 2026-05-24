@@ -27,7 +27,9 @@ object SkillParser {
     val pinnedPersonalities = setOf("tong-jincheng-perspective", "性感风情御姐.skill")
 
     fun parse(markdown: String, sourcePath: String, isBuiltin: Boolean): Skill? {
-        val match = frontmatterRegex.find(markdown) ?: return null
+        // Strip blockquote prefix ("> ") if every non-empty line starts with it
+        val cleaned = stripBlockquotePrefix(markdown)
+        val match = frontmatterRegex.find(cleaned) ?: return null
 
         val frontmatter = match.groupValues[1]
         val content = match.groupValues[2].trim()
@@ -54,6 +56,20 @@ object SkillParser {
             isPersonality = isPinnedPersonality,
             personalityName = if (isPinnedPersonality) displayName else ""
         )
+    }
+
+    /** Strip "> " prefix from lines if it looks like the whole file was blockquote-formatted */
+    private fun stripBlockquotePrefix(text: String): String {
+        val lines = text.lines()
+        val nonEmptyLines = lines.filter { it.isNotBlank() }
+        if (nonEmptyLines.isEmpty()) return text
+        val allHaveBlockquote = nonEmptyLines.all { it.startsWith("> ") || it.startsWith(">") }
+        if (!allHaveBlockquote) return text
+        return lines.joinToString("\n") { line ->
+            if (line.startsWith("> ")) line.removePrefix("> ")
+            else if (line.startsWith(">")) line.removePrefix(">")
+            else line
+        }
     }
 
     private fun extractField(frontmatter: String, key: String): String? {
